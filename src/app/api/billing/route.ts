@@ -100,6 +100,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('Billing request body:', body);
+    
     const { shop, planId } = CreateSubscriptionSchema.parse(body);
 
     const plan = getPlanById(planId);
@@ -110,13 +112,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('Selected plan:', plan);
+
     await dbConnect();
     
     const store = await Store.findOne({ shop, isActive: true });
     if (!store) {
+      console.error('Store not found:', shop);
       return NextResponse.json(
         { error: 'Store not found' },
         { status: 404 }
+      );
+    }
+
+    console.log('Store found:', { shop: store.shop, hasToken: !!store.accessToken });
+
+    // Check if we have a valid access token
+    if (!store.accessToken || store.accessToken.startsWith('dev_token_')) {
+      console.error('Invalid access token for store:', shop);
+      return NextResponse.json(
+        { error: 'Invalid store credentials. Please reinstall the app.' },
+        { status: 400 }
       );
     }
 
@@ -129,23 +145,39 @@ export async function POST(req: NextRequest) {
       test: process.env.NODE_ENV === 'development'
     };
 
-    const result = await createSubscription(shop, store.accessToken, billingPlan);
+    console.log('Creating subscription with plan:', billingPlan);
 
-    // Update store with pending subscription
-    store.subscription = {
-      id: result.subscription.id,
-      planId: plan.id,
-      status: 'PENDING',
-    };
-    await store.save();
+    try {
+      const result = await createSubscription(shop, store.accessToken, billingPlan);
+      
+      console.log('Subscription created successfully:', result.subscription.id);
 
-    return NextResponse.json({
-      ok: true,
-      subscription: result.subscription,
-      confirmationUrl: result.confirmationUrl
-    });
+      // Update store with pending subscription
+      store.subscription = {
+        id: result.subscription.id,
+        planId: plan.id,
+        status: 'PENDING',
+      };
+      await store.save();
 
-  } catch (error) {
+      return NextResponse.json({
+        ok: true,
+        subscription: result.subscription,
+        confirmationUrl: result.confirmationUrl
+      });
+    } catch (shopifyError: any) {
+      console.error('Shopify billing error:', shopifyError);
+      return NextResponse.json(
+        { 
+          error: 'Failed to create subscription with Shopify',
+          details: shopifyError.message,
+          shopifyError: true
+        },
+        { status: 500 }
+      );
+    }
+
+  } catch (error: any) {
     console.error('Create subscription error:', error);
     
     if (error instanceof z.ZodError) {
@@ -156,7 +188,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to create subscription' },
+      { 
+        error: 'Failed to create subscription',
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

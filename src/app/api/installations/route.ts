@@ -20,7 +20,7 @@ export async function GET() {
   try {
     await dbConnect();
     
-    const installations = await Store.find({}).select('-accessToken'); // Don't expose access tokens
+    const installations = await Store.find({}).select('shop scopes installedAt isActive accessToken subscription');
     
     return NextResponse.json({
       ok: true,
@@ -30,6 +30,10 @@ export async function GET() {
         scopes: store.scopes,
         installedAt: store.installedAt,
         isActive: store.isActive,
+        hasAccessToken: !!store.accessToken,
+        tokenType: store.accessToken?.startsWith('dev_token_') ? 'dev_token' : 'real_token',
+        tokenLength: store.accessToken?.length,
+        subscription: store.subscription,
         createdAt: store.createdAt,
         updatedAt: store.updatedAt,
       }))
