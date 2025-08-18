@@ -288,10 +288,16 @@ export default function Home() {
             The AI is already working with your Shopify data!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Install Shopify App
+            <button 
+              onClick={() => window.open('https://partners.shopify.com/', '_blank')}
+              className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Shopify Partners Dashboard
             </button>
-            <button className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors">
+            <button 
+              onClick={() => window.open('/docs', '_blank')}
+              className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors"
+            >
               View Documentation
             </button>
           </div>
