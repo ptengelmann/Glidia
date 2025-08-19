@@ -1,4 +1,3 @@
-// src/components/AIDemo.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -25,7 +24,10 @@ import {
   BarChart3,
   Eye,
   Heart,
-  ThumbsUp
+  ThumbsUp,
+  Package,
+  Database,
+  Cpu
 } from 'lucide-react';
 
 interface AIMessage {
@@ -57,28 +59,36 @@ const DEMO_SCENARIOS = [
     title: 'Anxious Customer - Missing Package',
     query: "Hi, I ordered something 2 weeks ago and it still hasn't arrived. The tracking shows delivered but I never got it. I'm really worried about my $300 order!",
     orderNumber: '#WM-1001',
-    context: 'High-value order, delivery confusion'
+    context: 'High-value order, delivery confusion',
+    icon: Package,
+    urgency: 'high'
   },
   {
     id: 'wismo-delay', 
     title: 'Shipping Delay Inquiry',
     query: "Hello, my order was supposed to arrive yesterday but tracking says it's still in transit. When will I actually get it?",
     orderNumber: '#WM-1002',
-    context: 'Standard delay inquiry'
+    context: 'Standard delay inquiry',
+    icon: Clock,
+    urgency: 'medium'
   },
   {
     id: 'wismr-defective',
     title: 'Defective Product Return',
     query: "The product I received is broken and doesn't work at all. I need to return this immediately and get my money back!",
     orderNumber: '#WM-1003',
-    context: 'Angry customer, defective product'
+    context: 'Angry customer, defective product',
+    icon: AlertCircle,
+    urgency: 'high'
   },
   {
     id: 'wismo-gift',
     title: 'Gift Delivery Concern',
     query: "I ordered this as a birthday gift and it needs to arrive by Friday. Can you please confirm it will make it on time?",
     orderNumber: '#WM-1004',
-    context: 'Time-sensitive gift delivery'
+    context: 'Time-sensitive gift delivery',
+    icon: Heart,
+    urgency: 'medium'
   }
 ];
 
@@ -95,7 +105,6 @@ export default function AIDemo() {
   });
   const [processingSteps, setProcessingSteps] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isListening, setIsListening] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -207,7 +216,7 @@ export default function AIDemo() {
     const systemMessage: AIMessage = {
       id: `system-${Date.now()}`,
       type: 'system',
-      content: 'AI is analyzing your query...',
+      content: 'Neural engine analyzing query...',
       timestamp: Date.now()
     };
 
@@ -246,110 +255,124 @@ export default function AIDemo() {
 
   const getToneColor = (tone: string) => {
     const colors = {
-      empathetic: 'text-purple-600 bg-purple-50 border-purple-200',
-      professional: 'text-blue-600 bg-blue-50 border-blue-200',
-      urgent: 'text-red-600 bg-red-50 border-red-200',
-      reassuring: 'text-green-600 bg-green-50 border-green-200',
-      apologetic: 'text-orange-600 bg-orange-50 border-orange-200'
+      empathetic: 'from-purple-500 to-purple-600',
+      professional: 'from-blue-500 to-blue-600',
+      urgent: 'from-red-500 to-red-600',
+      reassuring: 'from-emerald-500 to-emerald-600',
+      apologetic: 'from-amber-500 to-amber-600'
     };
-    return colors[tone as keyof typeof colors] || 'text-gray-600 bg-gray-50 border-gray-200';
+    return colors[tone as keyof typeof colors] || 'from-stone-500 to-stone-600';
   };
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
-      case 'positive': return <ThumbsUp className="w-4 h-4 text-green-500" />;
-      case 'negative': return <AlertCircle className="w-4 h-4 text-red-500" />;
-      default: return <Activity className="w-4 h-4 text-blue-500" />;
+      case 'positive': return <ThumbsUp className="w-4 h-4 text-emerald-400" />;
+      case 'negative': return <AlertCircle className="w-4 h-4 text-red-400" />;
+      default: return <Activity className="w-4 h-4 text-blue-400" />;
+    }
+  };
+
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
+      case 'high': return 'border-red-500/30 bg-red-500/10';
+      case 'medium': return 'border-amber-500/30 bg-amber-500/10';
+      default: return 'border-emerald-500/30 bg-emerald-500/10';
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header with Live Metrics */}
-      <div className="mb-8">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-50 to-stone-50 border border-red-100 text-red-700 text-sm font-medium mb-4">
-            <Brain className="w-4 h-4" />
-            <span>Neural Response Engine</span>
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4">
-            Next-Generation AI
-            <span className="bg-gradient-to-r from-red-500 to-stone-700 bg-clip-text text-transparent"> Support Intelligence</span>
-          </h2>
-          <p className="text-xl text-stone-600 max-w-3xl mx-auto">
-            Watch our neural engine analyze customer emotions, fetch real order data, 
-            and craft perfect responses in real-time
-          </p>
+    <div className="w-full">
+      {/* Live Metrics Dashboard */}
+      {showMetrics && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { icon: Target, label: 'Accuracy', value: realTimeMetrics.accuracy.toFixed(1), unit: '%', color: 'from-red-500 to-red-600' },
+            { icon: Clock, label: 'Response Time', value: realTimeMetrics.responseTime.toFixed(1), unit: 's', color: 'from-amber-500 to-amber-600' },
+            { icon: Heart, label: 'Satisfaction', value: realTimeMetrics.customerSatisfaction.toFixed(1), unit: '%', color: 'from-emerald-500 to-emerald-600' },
+            { icon: TrendingUp, label: 'Reduction', value: realTimeMetrics.escalationReduction.toFixed(1), unit: '%', color: 'from-violet-500 to-violet-600' }
+          ].map((metric, index) => {
+            const Icon = metric.icon;
+            return (
+              <div key={index} className="group relative">
+                <div className="absolute inset-0 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                  <div className={`w-full h-full rounded-2xl bg-gradient-to-r ${metric.color} opacity-20`}></div>
+                </div>
+                
+                <div className="relative bg-black/40 backdrop-blur-2xl border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-all duration-500 overflow-hidden">
+                  <div className="absolute top-3 right-3 w-2 h-2 bg-white/30 rounded-full animate-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="mb-4">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center shadow-xl relative overflow-hidden`}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        <Icon className="w-6 h-6 text-white relative z-10" />
+                      </div>
+                    </div>
+                    
+                    <div className="mb-2">
+                      <div className="flex items-baseline space-x-1">
+                        <span className="text-3xl font-black text-white">{metric.value}</span>
+                        <span className="text-lg font-bold text-white/60">{metric.unit}</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-white/80 font-medium">{metric.label}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-
-        {/* Live Metrics Dashboard */}
-        {showMetrics && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-xl p-4 border border-stone-200 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-red-600" />
-                <span className="text-2xl font-bold text-stone-900">{realTimeMetrics.accuracy.toFixed(1)}%</span>
-              </div>
-              <p className="text-sm text-stone-600">Accuracy Rate</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-stone-200 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <Clock className="w-5 h-5 text-blue-600" />
-                <span className="text-2xl font-bold text-stone-900">{realTimeMetrics.responseTime.toFixed(1)}s</span>
-              </div>
-              <p className="text-sm text-stone-600">Response Time</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-stone-200 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <Heart className="w-5 h-5 text-green-600" />
-                <span className="text-2xl font-bold text-stone-900">{realTimeMetrics.customerSatisfaction.toFixed(1)}%</span>
-              </div>
-              <p className="text-sm text-stone-600">Satisfaction</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-stone-200 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="w-5 h-5 text-purple-600" />
-                <span className="text-2xl font-bold text-stone-900">{realTimeMetrics.escalationReduction.toFixed(1)}%</span>
-              </div>
-              <p className="text-sm text-stone-600">Escalation Reduction</p>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Scenario Selector */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 sticky top-24">
-            <h3 className="text-lg font-bold text-stone-900 mb-4 flex items-center space-x-2">
-              <Shuffle className="w-5 h-5 text-red-600" />
-              <span>Demo Scenarios</span>
-            </h3>
-            <div className="space-y-3">
-              {DEMO_SCENARIOS.map((scenario) => (
-                <button
-                  key={scenario.id}
-                  onClick={() => setCurrentScenario(scenario)}
-                  className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                    currentScenario.id === scenario.id
-                      ? 'border-red-200 bg-red-50 shadow-sm'
-                      : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
-                  }`}
-                >
-                  <h4 className="font-semibold text-stone-900 mb-1">{scenario.title}</h4>
-                  <p className="text-sm text-stone-600 mb-2">{scenario.context}</p>
-                  <span className="inline-flex px-2 py-1 rounded-md bg-stone-100 text-stone-700 text-xs font-mono">
-                    {scenario.orderNumber}
-                  </span>
-                </button>
-              ))}
+          <div className="bg-black/40 backdrop-blur-2xl border border-white/5 rounded-2xl p-6 sticky top-24">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                <Shuffle className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Demo Scenarios</h3>
+                <p className="text-xs text-white/60">Select a customer query</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3 mb-6">
+              {DEMO_SCENARIOS.map((scenario) => {
+                const Icon = scenario.icon;
+                return (
+                  <button
+                    key={scenario.id}
+                    onClick={() => setCurrentScenario(scenario)}
+                    className={`w-full text-left p-4 rounded-xl border transition-all duration-300 group ${
+                      currentScenario.id === scenario.id
+                        ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/10'
+                        : 'border-white/10 hover:border-white/20 hover:bg-white/5'
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getUrgencyColor(scenario.urgency)}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-white mb-1 text-sm">{scenario.title}</h4>
+                        <p className="text-xs text-white/60 mb-2 line-clamp-2">{scenario.context}</p>
+                        <span className="inline-flex px-2 py-1 rounded-md bg-white/10 text-white/80 text-xs font-mono">
+                          {scenario.orderNumber}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             <button
               onClick={handleSendMessage}
               disabled={isProcessing}
-              className="w-full mt-6 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-red-600 hover:to-red-700 transition-all flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-red-600 hover:to-red-700 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-red-500/25"
             >
               {isProcessing ? (
                 <>
@@ -368,22 +391,22 @@ export default function AIDemo() {
 
         {/* Chat Interface */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <div className="bg-black/40 backdrop-blur-2xl border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
             {/* Chat Header */}
-            <div className="bg-gradient-to-r from-stone-800 to-black p-6 text-white">
+            <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
-                    <Bot className="w-5 h-5" />
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <Package className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold">Glidia AI Assistant</h3>
-                    <p className="text-stone-300 text-sm">Neural Response Engine v2.1</p>
+                    <h3 className="font-bold text-lg">Glidia Care</h3>
+                    <p className="text-red-100 text-sm">WISMO & WISMR Automation</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                  <span className="text-sm">Online</span>
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                  <span className="text-sm font-medium">AI Active</span>
                 </div>
               </div>
             </div>
@@ -392,84 +415,89 @@ export default function AIDemo() {
             <div className="h-96 overflow-y-auto p-6 space-y-4">
               {messages.length === 0 && (
                 <div className="text-center py-12">
-                  <MessageSquare className="w-12 h-12 text-stone-400 mx-auto mb-4" />
-                  <p className="text-stone-500">Select a scenario and click "Send Query" to see the AI in action</p>
+                  <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <MessageSquare className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-white/60 mb-2">Neural Engine Ready</p>
+                  <p className="text-white/40 text-sm">Select a scenario and click "Send Query" to see the AI in action</p>
                 </div>
               )}
 
               {messages.map((message) => (
                 <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-md px-4 py-3 rounded-2xl ${
+                  <div className={`max-w-md rounded-2xl overflow-hidden ${
                     message.type === 'user'
-                      ? 'bg-red-500 text-white'
+                      ? 'bg-white/10 backdrop-blur-sm border border-white/20'
                       : message.type === 'system'
-                      ? 'bg-stone-100 text-stone-600'
-                      : 'bg-stone-50 border border-stone-200'
+                      ? 'bg-amber-500/20 border border-amber-500/30'
+                      : 'bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/30'
                   }`}>
-                    {message.type !== 'system' && (
-                      <div className="flex items-center space-x-2 mb-2">
-                        {message.type === 'user' ? (
-                          <User className="w-4 h-4" />
-                        ) : (
-                          <Bot className="w-4 h-4 text-red-600" />
-                        )}
-                        <span className="font-medium text-sm">
-                          {message.type === 'user' ? 'Customer' : 'AI Assistant'}
-                        </span>
-                      </div>
-                    )}
-                    
-                    <p className={`leading-relaxed ${message.type === 'ai' ? 'text-stone-700' : ''}`}>
-                      {message.content}
-                    </p>
-
-                    {/* AI Metadata */}
-                    {message.metadata && (
-                      <div className="mt-4 pt-3 border-t border-stone-200 space-y-2">
-                        <div className="flex flex-wrap gap-2">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getToneColor(message.metadata.tone)}`}>
-                            {message.metadata.tone}
-                          </span>
-                          <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs border border-blue-200">
-                            {message.metadata.confidence}% confident
-                          </span>
-                          <span className="inline-flex items-center px-2 py-1 rounded-md bg-stone-100 text-stone-700 text-xs border border-stone-200">
-                            {getSentimentIcon(message.metadata.sentiment)}
-                            <span className="ml-1">{message.metadata.sentiment}</span>
+                    <div className="px-4 py-3">
+                      {message.type !== 'system' && (
+                        <div className="flex items-center space-x-2 mb-2">
+                          {message.type === 'user' ? (
+                            <User className="w-4 h-4 text-white/80" />
+                          ) : (
+                            <Bot className="w-4 h-4 text-red-400" />
+                          )}
+                          <span className="font-medium text-sm text-white/90">
+                            {message.type === 'user' ? 'Customer' : 'Glidia Care'}
                           </span>
                         </div>
-                        
-                        {message.metadata.suggestions && (
-                          <div className="text-xs text-stone-600">
-                            <p className="font-medium mb-1">Auto-generated actions:</p>
-                            <ul className="space-y-1">
-                              {message.metadata.suggestions.map((suggestion, idx) => (
-                                <li key={idx} className="flex items-center space-x-1">
-                                  <CheckCircle className="w-3 h-3 text-green-500" />
-                                  <span>{suggestion}</span>
-                                </li>
-                              ))}
-                            </ul>
+                      )}
+                      
+                      <p className="leading-relaxed text-white/90 text-sm">
+                        {message.content}
+                      </p>
+
+                      {/* AI Metadata */}
+                      {message.metadata && (
+                        <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
+                          <div className="flex flex-wrap gap-2">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gradient-to-r ${getToneColor(message.metadata.tone)} text-white`}>
+                              {message.metadata.tone}
+                            </span>
+                            <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-500/20 text-blue-300 text-xs border border-blue-500/30">
+                              {message.metadata.confidence}% confident
+                            </span>
+                            <span className="inline-flex items-center px-2 py-1 rounded-md bg-white/10 text-white/80 text-xs border border-white/20">
+                              {getSentimentIcon(message.metadata.sentiment)}
+                              <span className="ml-1">{message.metadata.sentiment}</span>
+                            </span>
                           </div>
-                        )}
-                      </div>
-                    )}
+                          
+                          {message.metadata.suggestions && (
+                            <div className="text-xs text-white/70">
+                              <p className="font-medium mb-2 text-white/90">Auto-generated actions:</p>
+                              <ul className="space-y-1">
+                                {message.metadata.suggestions.map((suggestion, idx) => (
+                                  <li key={idx} className="flex items-center space-x-2">
+                                    <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                    <span>{suggestion}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
 
               {/* Processing Steps */}
               {isProcessing && processingSteps.length > 0 && (
-                <div className="bg-stone-50 rounded-xl p-4 border border-stone-200">
+                <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30 backdrop-blur-sm">
                   <div className="flex items-center space-x-2 mb-3">
-                    <Activity className="w-4 h-4 text-red-600 animate-pulse" />
-                    <span className="font-medium text-stone-900">AI Processing</span>
+                    <Cpu className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <span className="font-medium text-amber-300">Glidia Neural Processing</span>
                   </div>
                   <div className="space-y-2">
                     {processingSteps.map((step, idx) => (
                       <div key={idx} className="flex items-center space-x-2 text-sm">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span className="text-stone-700">{step}</span>
+                        <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                        <span className="text-white/80">{step}</span>
                       </div>
                     ))}
                   </div>
@@ -480,19 +508,19 @@ export default function AIDemo() {
             </div>
 
             {/* Chat Actions */}
-            <div className="border-t border-stone-200 p-4">
+            <div className="border-t border-white/10 p-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-stone-500">
+                <div className="text-sm text-white/60">
                   Powered by Glidia Neural Engine
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button className="p-2 text-stone-500 hover:text-stone-700 transition-colors">
+                  <button className="p-2 text-white/60 hover:text-white/80 transition-colors rounded-lg hover:bg-white/10">
                     <Copy className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-stone-500 hover:text-stone-700 transition-colors">
+                  <button className="p-2 text-white/60 hover:text-white/80 transition-colors rounded-lg hover:bg-white/10">
                     <Download className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-stone-500 hover:text-stone-700 transition-colors">
+                  <button className="p-2 text-white/60 hover:text-white/80 transition-colors rounded-lg hover:bg-white/10">
                     <Share2 className="w-4 h-4" />
                   </button>
                 </div>

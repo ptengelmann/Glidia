@@ -1,8 +1,7 @@
-// src/components/Navbar.tsx
 'use client';
 
 import { useState } from 'react';
-import { Package, ChevronDown, Menu, X } from 'lucide-react';
+import { Package, ChevronDown, Menu, X, Activity, Brain } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -18,26 +17,21 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
   const isLanding = variant === 'landing';
 
   return (
-    <nav className={`fixed top-0 w-full backdrop-blur-xl border-b z-50 ${
-      isLanding 
-        ? 'bg-black/80 border-stone-800/50' 
-        : 'bg-stone-50/80 border-stone-200/50'
-    }`}>
+    <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-xl border-b border-stone-800/50 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-4">
             <div className="relative">
-              {/* Try to use the logo, fallback to Package icon */}
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
                 <Image 
                   src="/GlidiaLogo.png" 
                   alt="Glidia Logo" 
                   width={24} 
                   height={24} 
-                  className="rounded"
+                  className="rounded relative z-10"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling.style.display = 'block';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
                   }}
                 />
                 <Package className="w-5 h-5 text-white hidden" />
@@ -45,18 +39,10 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h1 className={`text-xl font-bold bg-gradient-to-r ${
-                isLanding
-                  ? 'from-red-400 to-amber-400'
-                  : 'from-stone-900 to-stone-700'
-              } bg-clip-text text-transparent`}>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
                 Glidia
               </h1>
-              <p className={`text-xs font-medium ${
-                isLanding ? 'text-stone-400' : 'text-stone-500'
-              }`}>
-                AI Support Intelligence
-              </p>
+              <p className="text-xs text-stone-400 font-medium">AI Support Intelligence</p>
             </div>
           </Link>
           
@@ -119,7 +105,7 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
                 {showDashboardLink && (
                   <button 
                     onClick={() => window.open('/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
-                    className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300"
+                    className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg shadow-red-500/25"
                   >
                     Try For Free
                   </button>
@@ -127,22 +113,21 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
               </>
             ) : (
               <>
-                {/* Dashboard variant */}
-                <div className="flex items-center space-x-6 text-sm text-stone-600">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="font-medium">Live Demo Mode</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                    <span className="font-medium">AI Active</span>
-                  </div>
-                </div>
+                {/* Clean Dashboard variant - no duplicate status indicators */}
+                <button 
+                  onClick={() => window.open('/', '_self')}
+                  className="text-stone-300 hover:text-red-400 transition-colors"
+                >
+                  Back to Home
+                </button>
+                
+                <a href="#docs" className="text-stone-300 hover:text-red-400 transition-colors">Docs</a>
+                <a href="#support" className="text-stone-300 hover:text-red-400 transition-colors">Support</a>
                 
                 {showDashboardLink && (
                   <Link
                     href="/app/dashboard?shop=glidiatest.myshopify.com"
-                    className="bg-black text-stone-50 px-4 py-2 rounded-lg text-sm font-medium hover:bg-stone-900 transition-all duration-200"
+                    className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg shadow-red-500/25"
                   >
                     Dashboard
                   </Link>
@@ -153,7 +138,7 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
           
           {/* Mobile menu button */}
           <button 
-            className={`md:hidden ${isLanding ? 'text-white' : 'text-stone-900'}`}
+            className="md:hidden text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -163,11 +148,7 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
       
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className={`md:hidden border-t ${
-          isLanding 
-            ? 'bg-black/95 backdrop-blur-xl border-stone-800/50' 
-            : 'bg-stone-50/95 backdrop-blur-xl border-stone-200/50'
-        }`}>
+        <div className="md:hidden bg-black/95 backdrop-blur-xl border-t border-stone-800/50">
           <div className="px-6 py-4 space-y-4">
             {isLanding ? (
               <>
@@ -186,14 +167,19 @@ export default function Navbar({ variant = 'landing', showDashboardLink = true }
               </>
             ) : (
               <>
-                <div className="flex items-center space-x-2 text-sm text-stone-600">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  <span className="font-medium">Live Demo Mode</span>
-                </div>
+                <div className="text-stone-300 text-sm">Dashboard Navigation</div>
+                <button 
+                  onClick={() => window.open('/', '_self')}
+                  className="text-stone-300 hover:text-red-400 transition-colors"
+                >
+                  Back to Home
+                </button>
+                <a href="#docs" className="text-stone-300 hover:text-red-400 transition-colors">Docs</a>
+                <a href="#support" className="text-stone-300 hover:text-red-400 transition-colors">Support</a>
                 {showDashboardLink && (
                   <Link
                     href="/app/dashboard?shop=glidiatest.myshopify.com"
-                    className="block bg-black text-stone-50 px-4 py-3 rounded-lg text-sm font-medium hover:bg-stone-900 transition-all duration-200 text-center"
+                    className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg shadow-red-500/25"
                   >
                     Dashboard
                   </Link>
