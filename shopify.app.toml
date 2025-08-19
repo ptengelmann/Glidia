@@ -2,33 +2,26 @@
 # Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "glidia-care"
-client_id = "5575757e5b7ffbd0358890176680851e"
-application_url = "https://your-production-domain.com"
+client_id = "5575757e5b7ffbd035889017668d051e"
+application_url = "https://glidia-9cz9hahc3-pedros-projects-1f034c95.vercel.app"
 embedded = true
 
 [access_scopes]
-scopes = "read_orders,read_products,read_customers,write_orders"
+scopes = "read_orders,read_products,write_orders"
 
 [auth]
 redirect_urls = [
-  "https://your-production-domain.com/api/auth/shopify/callback",
+  "https://glidia-9cz9hahc3-pedros-projects-1f034c95.vercel.app/api/auth/shopify/callback",
   "http://localhost:3000/api/auth/shopify/callback"
 ]
 
 [webhooks]
 api_version = "2024-10"
 
+  # Only keep app/uninstalled - it's safe
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/api/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
-  topics = [ "orders/paid" ]
-  uri = "/api/webhooks/orders/paid"
-
-  [[webhooks.subscriptions]]
-  topics = [ "orders/fulfilled" ]
-  uri = "/api/webhooks/orders/fulfilled"
 
 [pos]
 embedded = false
@@ -36,3 +29,4 @@ embedded = false
 [build]
 automatically_update_urls_on_dev = true
 dev_store_url = "https://glidiatest.myshopify.com"
+include_config_on_deploy = true
