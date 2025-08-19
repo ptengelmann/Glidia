@@ -756,7 +756,7 @@ export default function GlidiaLanding() {
                          <Bot className="w-5 h-5 text-white" />
                        </div>
                        <div>
-                         <h3 className="font-semibold text-white">Neural Engine</h3>
+                         <h3 className="font-semibold text-white">Glidia Care</h3>
                          <div className="flex items-center text-sm">
                            <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
                            <span className="text-emerald-400">Processing queries</span>
