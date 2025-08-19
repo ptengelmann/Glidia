@@ -19,9 +19,11 @@ export default function Footer() {
                     height={28} 
                     className="rounded"
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling.style.display = 'block';
-                    }}
+                       e.currentTarget.style.display = 'none';
+                       const nextSibling = e.currentTarget.nextElementSibling;
+                       if (nextSibling) {
+                         (nextSibling as HTMLElement).style.display = 'block';                       }
+                     }}
                   />
                   <Package className="w-6 h-6 text-white hidden" />
                 </div>

@@ -21,11 +21,18 @@ export async function POST(req: NextRequest) {
 
     console.log("AI WISMO Request:", { orderName, customerName });
 
-    // Generate AI-powered response
+    // Safely destructure storeInfo and provide a fallback for 'name'
+    const aiStoreInfo = {
+      name: storeInfo?.name ?? 'Customer Service', // Default value for store name
+      brandVoice: storeInfo?.brandVoice,
+      supportEmail: storeInfo?.supportEmail,
+    };
+
+    // Generate AI-powered response with the safe data
     const aiResponse = await generateWismoResponse({
       orderName,
       customerName,
-      storeInfo,
+      storeInfo: aiStoreInfo, // Pass the new, safe object
     });
 
     // Log the query for analytics (async, non-blocking)

@@ -66,6 +66,25 @@ import {
   X
 } from 'lucide-react';
 
+type UserMessage = {
+  sender: 'user';
+  text: string;
+};
+
+type AiMessage = {
+  sender: 'ai';
+  text: string;
+  metadata: {
+    confidence?: number;
+    response_time?: string;
+    source?: string;
+    actions_taken?: string[];
+    contingency?: string;
+  };
+};
+
+type DemoMessage = UserMessage | AiMessage;
+
 export default function GlidiaLanding() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeMetric, setActiveMetric] = useState(0);
@@ -77,16 +96,17 @@ export default function GlidiaLanding() {
   const [showLiveDemo, setShowLiveDemo] = useState(false);
   const [showProductsDropdown, setShowProductsDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [demoMessages, setDemoMessages] = useState([
+  const [demoMessages, setDemoMessages] = useState<DemoMessage[]>([
     { sender: 'user', text: "Where's my order #12345? It was supposed to arrive yesterday." }
   ]);
+  
   const [demoTyping, setDemoTyping] = useState(false);
   const [demoStage, setDemoStage] = useState(0);
   
   const heroRef = useRef(null);
-  const storyRef = useRef(null);
+  const storyRef = useRef<HTMLDivElement | null>(null);
   const testimonialRef = useRef(null);
-  const pricingRef = useRef(null);
+  const pricingRef = useRef<HTMLDivElement | null>(null);
   const storyStepsRef = useRef([]);
   const liveDemoRef = useRef(null);
 
@@ -533,7 +553,7 @@ export default function GlidiaLanding() {
   );
 
   // Render custom glitch effect
-  const renderGlitchText = (text, isActive = false) => (
+    const renderGlitchText = (text: string, isActive = false) => (
     <div className="relative inline-block">
       <span className={`relative z-10 ${isActive ? 'text-transparent' : ''}`}>{text}</span>
       {isActive && (
