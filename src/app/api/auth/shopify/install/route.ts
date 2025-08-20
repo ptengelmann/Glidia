@@ -1,10 +1,12 @@
 // src/app/api/auth/shopify/install/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { generateInstallUrl, isValidShopDomain } from '@/lib/shopify-oauth';
+import { getAuthorizationUrl, isValidShopDomain } from '@/lib/shopify-oauth';
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
   const shop = searchParams.get('shop');
+
+  console.log('Install route called with shop:', shop);
 
   if (!shop) {
     return NextResponse.json(
@@ -13,7 +15,10 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  if (!isValidShopDomain(shop)) {
+  // Normalize shop domain
+  const shopDomain = shop.endsWith('.myshopify.com') ? shop : `${shop}.myshopify.com`;
+
+  if (!isValidShopDomain(shopDomain)) {
     return NextResponse.json(
       { error: 'Invalid shop domain' },
       { status: 400 }
@@ -21,49 +26,22 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const installUrl = generateInstallUrl(shop);
-    
-    // Redirect to Shopify for app installation
-    return NextResponse.redirect(installUrl);
+    // Generate OAuth authorization URL
+    const authUrl = getAuthorizationUrl(shopDomain);
+    console.log('Redirecting to authorization URL:', authUrl);
+
+    // Redirect to Shopify OAuth flow
+    return NextResponse.redirect(authUrl);
   } catch (error) {
-    console.error('Install error:', error);
+    console.error('Install route error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate install URL' },
+      { error: 'Failed to generate authorization URL' },
       { status: 500 }
     );
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const { shop } = await req.json();
-
-    if (!shop) {
-      return NextResponse.json(
-        { error: 'Shop parameter is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!isValidShopDomain(shop)) {
-      return NextResponse.json(
-        { error: 'Invalid shop domain' },
-        { status: 400 }
-      );
-    }
-
-    const installUrl = generateInstallUrl(shop);
-    
-    return NextResponse.json({
-      ok: true,
-      installUrl,
-      message: 'Redirect to this URL to install the app'
-    });
-  } catch (error) {
-    console.error('Install POST error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate install URL' },
-      { status: 500 }
-    );
-  }
+// Also handle POST requests (some Shopify flows use POST)
+export async function POST(request: NextRequest) {
+  return GET(request);
 }

@@ -1,6 +1,8 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ShopifyAppProvider from "@/components/ShopifyAppProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,15 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        {/* Allow iframe embedding for Shopify */}
-        <meta httpEquiv="X-Frame-Options" content="ALLOWALL" />
-        <meta httpEquiv="Content-Security-Policy" content="frame-ancestors 'self' https://*.shopify.com https://*.myshopify.com;" />
-      </head>
+      {/* Remove the meta tags - they're causing issues */}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ShopifyAppProvider>
+          {children}
+        </ShopifyAppProvider>
       </body>
     </html>
   );

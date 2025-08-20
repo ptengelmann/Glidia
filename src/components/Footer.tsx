@@ -1,58 +1,56 @@
 // src/components/Footer.tsx
-import { Package, Mail, Phone, MapPin, ExternalLink, Github, Twitter, Linkedin } from 'lucide-react';
+import { Package, Mail, ExternalLink, Github, Twitter, Linkedin, ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer className="bg-black py-16 px-6 lg:px-8 border-t border-stone-800/50">
+    <footer className="bg-black py-20 px-6 lg:px-8 border-t border-white/5">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+        <div className="grid md:grid-cols-4 gap-12 mb-16">
           {/* Brand Section */}
           <div className="col-span-2">
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center space-x-3 mb-8">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-8 h-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
                   <Image 
                     src="/GlidiaLogo.png" 
                     alt="Glidia Logo" 
-                    width={28} 
-                    height={28} 
-                    className="rounded"
+                    width={16} 
+                    height={16} 
+                    className="rounded relative z-10"
                     onError={(e) => {
                        e.currentTarget.style.display = 'none';
                        const nextSibling = e.currentTarget.nextElementSibling;
                        if (nextSibling) {
-                         (nextSibling as HTMLElement).style.display = 'block';                       }
+                         (nextSibling as HTMLElement).style.display = 'block';
+                       }
                      }}
                   />
-                  <Package className="w-6 h-6 text-white hidden" />
+                  <div className="w-4 h-4 bg-white rounded flex items-center justify-center hidden">
+                    <span className="text-black text-xs font-bold">G</span>
+                  </div>
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full">
+                  <div className="w-full h-full bg-emerald-400 rounded-full animate-pulse"></div>
+                </div>
               </div>
               <div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
-                  Glidia
-                </h3>
-                <p className="text-stone-400 text-sm font-medium">AI Support Intelligence</p>
+                <h3 className="text-lg font-medium text-white">Glidia</h3>
+                <div className="text-xs text-stone-500 font-mono -mt-0.5">NEURAL.AI</div>
               </div>
             </div>
-            <p className="text-stone-400 max-w-md leading-relaxed mb-6">
-              Advanced AI platform that transforms customer support through intelligent automation 
-              and empathetic response generation. <span className="text-red-400 font-semibold">Eliminate WISMO chaos forever.</span>
+            
+            <p className="text-stone-400 max-w-md leading-relaxed mb-8 text-sm">
+              AI-powered customer support automation that transforms post-purchase queries 
+              into satisfied customers. <span className="text-white">Eliminate support chaos forever.</span>
             </p>
             
             {/* Contact Info */}
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-stone-400">
+              <div className="flex items-center space-x-3 text-stone-500">
                 <Mail className="w-4 h-4" />
-                <a href="mailto:hello@glidia.ai" className="hover:text-red-400 transition-colors">
+                <a href="mailto:hello@glidia.ai" className="hover:text-white transition-colors text-sm">
                   hello@glidia.ai
-                </a>
-              </div>
-              <div className="flex items-center space-x-3 text-stone-400">
-                <Phone className="w-4 h-4" />
-                <a href="tel:+1-555-GLIDIA" className="hover:text-red-400 transition-colors">
-                  +1 (555) GLIDIA
                 </a>
               </div>
             </div>
@@ -60,78 +58,61 @@ export default function Footer() {
           
           {/* Products Section */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-lg">Products</h4>
-            <ul className="space-y-3 text-stone-400">
+            <h4 className="font-medium text-white mb-6">Products</h4>
+            <ul className="space-y-3 text-sm">
               <li>
-                <a href="#product" className="hover:text-red-400 transition-colors flex items-center group">
+                <a href="#product" className="text-stone-400 hover:text-white transition-colors flex items-center group">
                   <span>Glidia Care</span>
-                  <span className="ml-2 px-2 py-0.5 bg-red-900/30 text-red-300 text-xs rounded-full border border-red-700/30">
-                    Available
-                  </span>
+                  <div className="ml-2 w-2 h-2 bg-emerald-500 rounded-full"></div>
                 </a>
               </li>
               <li>
-                <span className="text-stone-500 flex items-center">
+                <span className="text-stone-600 flex items-center">
                   Glidia Engage
-                  <span className="ml-2 px-2 py-0.5 bg-amber-900/30 text-amber-300 text-xs rounded-full border border-amber-700/30">
-                    Coming Soon
-                  </span>
+                  <div className="ml-2 w-2 h-2 bg-amber-500 rounded-full opacity-50"></div>
                 </span>
               </li>
               <li>
-                <span className="text-stone-500 flex items-center">
+                <span className="text-stone-600 flex items-center">
                   Glidia Insights
-                  <span className="ml-2 px-2 py-0.5 bg-amber-900/30 text-amber-300 text-xs rounded-full border border-amber-700/30">
-                    Coming Soon
-                  </span>
+                  <div className="ml-2 w-2 h-2 bg-amber-500 rounded-full opacity-50"></div>
                 </span>
               </li>
               <li>
-                <span className="text-stone-500 flex items-center">
-                  Glidia Automate
-                  <span className="ml-2 px-2 py-0.5 bg-amber-900/30 text-amber-300 text-xs rounded-full border border-amber-700/30">
-                    Coming Soon
-                  </span>
-                </span>
-              </li>
-              <li><a href="#pricing" className="hover:text-red-400 transition-colors">Pricing</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Integrations</a></li>
-              <li>
-                <a href="#" className="hover:text-red-400 transition-colors flex items-center">
-                  API Documentation
-                  <ExternalLink className="w-3 h-3 ml-1" />
+                <a href="#" className="text-stone-400 hover:text-white transition-colors flex items-center">
+                  API Docs
+                  <ArrowUpRight className="w-3 h-3 ml-1 opacity-50" />
                 </a>
               </li>
+              <li><a href="#pricing" className="text-stone-400 hover:text-white transition-colors">Pricing</a></li>
             </ul>
           </div>
           
           {/* Company Section */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-lg">Company</h4>
-            <ul className="space-y-3 text-stone-400">
-              <li><a href="#about" className="hover:text-red-400 transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Careers</a></li>
-              <li><a href="#contact" className="hover:text-red-400 transition-colors">Contact</a></li>
-              <li><a href="#support" className="hover:text-red-400 transition-colors">Support Center</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Status Page</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Security</a></li>
+            <h4 className="font-medium text-white mb-6">Company</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#about" className="text-stone-400 hover:text-white transition-colors">About</a></li>
+              <li><a href="#" className="text-stone-400 hover:text-white transition-colors">Documentation</a></li>
+              <li><a href="#support" className="text-stone-400 hover:text-white transition-colors">Support</a></li>
+              <li><a href="#" className="text-stone-400 hover:text-white transition-colors">Security</a></li>
+              <li><a href="#" className="text-stone-400 hover:text-white transition-colors">Status</a></li>
             </ul>
           </div>
         </div>
         
-        {/* Social Links */}
-        <div className="border-t border-stone-800 pt-8 pb-8">
+        {/* Social Links & Status */}
+        <div className="border-t border-white/5 pt-8 pb-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-6 mb-4 md:mb-0">
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors">
-                <Twitter className="w-5 h-5" />
+              <a href="#" className="text-stone-500 hover:text-white transition-colors">
+                <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors">
-                <Linkedin className="w-5 h-5" />
+              <a href="#" className="text-stone-500 hover:text-white transition-colors">
+                <Linkedin className="w-4 h-4" />
               </a>
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors">
-                <Github className="w-5 h-5" />
+              <a href="#" className="text-stone-500 hover:text-white transition-colors">
+                <Github className="w-4 h-4" />
               </a>
             </div>
             
@@ -143,54 +124,49 @@ export default function Footer() {
         </div>
         
         {/* Bottom Section */}
-        <div className="border-t border-stone-800 pt-8">
+        <div className="border-t border-white/5 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-stone-400 text-sm mb-4 md:mb-0">
-              © 2025 Glidia. All rights reserved. 
-              <span className="ml-2 text-stone-500">Powered by Neural AI.</span>
+            <p className="text-stone-500 text-sm mb-4 md:mb-0">
+              © 2025 Glidia. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors text-sm">
-                Privacy Policy
+              <a href="#" className="text-stone-500 hover:text-white transition-colors text-sm">
+                Privacy
               </a>
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors text-sm">
-                Terms of Service
+              <a href="#" className="text-stone-500 hover:text-white transition-colors text-sm">
+                Terms
               </a>
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors text-sm">
-                Cookie Policy
-              </a>
-              <a href="#" className="text-stone-400 hover:text-red-400 transition-colors text-sm">
+              <a href="#" className="text-stone-500 hover:text-white transition-colors text-sm">
                 Security
               </a>
             </div>
           </div>
         </div>
         
-        {/* Trust Badges */}
-        <div className="mt-8 pt-8 border-t border-stone-800/50">
+        {/* Trust Indicators */}
+        <div className="mt-12 pt-8 border-t border-white/5">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-center md:text-left mb-4 md:mb-0">
-              <p className="text-stone-500 text-xs mb-2">Trusted by 500+ innovative brands</p>
-              <div className="flex items-center space-x-4 opacity-60">
-                {/* Placeholder for company logos */}
-                <div className="h-6 w-20 bg-stone-700/30 rounded"></div>
-                <div className="h-6 w-24 bg-stone-700/30 rounded"></div>
-                <div className="h-6 w-18 bg-stone-700/30 rounded"></div>
-                <div className="h-6 w-22 bg-stone-700/30 rounded"></div>
+              <p className="text-stone-600 text-xs mb-3">Trusted by 500+ brands</p>
+              <div className="flex items-center space-x-4 opacity-30">
+                <div className="h-4 w-16 bg-white/10 rounded"></div>
+                <div className="h-4 w-20 bg-white/10 rounded"></div>
+                <div className="h-4 w-14 bg-white/10 rounded"></div>
+                <div className="h-4 w-18 bg-white/10 rounded"></div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-xs text-stone-500">
-                <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                <span>SOC 2 Compliant</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2 text-xs text-stone-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                <span>SOC 2</span>
               </div>
-              <div className="flex items-center space-x-2 text-xs text-stone-500">
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span>GDPR Ready</span>
+              <div className="flex items-center space-x-2 text-xs text-stone-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                <span>GDPR</span>
               </div>
-              <div className="flex items-center space-x-2 text-xs text-stone-500">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+              <div className="flex items-center space-x-2 text-xs text-stone-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                 <span>99.9% Uptime</span>
               </div>
             </div>

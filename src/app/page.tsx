@@ -1,1563 +1,691 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Image from 'next/image';
 import { 
-  Package, 
-  MessageSquare, 
+  Brain, 
   Zap, 
-  BarChart3, 
-  ArrowRight, 
-  CheckCircle,
-  TrendingUp,
-  Shield,
-  Bot,
-  Clock,
-  Users,
-  Sparkles,
-  Globe,
-  ChevronDown,
-  Star,
-  Play,
-  Brain,
+  Database, 
+  MessageSquare, 
   Target,
+  ArrowRight,
+  Play,
+  Clock,
+  TrendingDown,
+  Shield,
+  CheckCircle,
+  Star,
+  DollarSign,
+  Calendar,
+  Package,
   Activity,
+  Network,
   Eye,
   Layers,
   Code,
-  Database,
   Cpu,
-  Network,
-  Lock,
-  Gauge,
-  LineChart,
-  PieChart,
-  BarChart,
-  MousePointer,
-  Smartphone,
-  Monitor,
-  Headphones,
-  Award,
-  Rocket,
-  Heart,
-  ThumbsUp,
-  MessageCircle,
-  Calendar,
-  DollarSign,
-  Percent,
-  ArrowUpRight,
-  ExternalLink,
-  ChevronRight,
-  Briefcase,
-  Building,
-  ShoppingCart,
-  TrendingDown,
-  Minus,
-  Plus,
+  Bot,
   Send,
-  Inbox,
   User,
   RefreshCw,
-  Mail,
-  Phone,
-  Menu,
-  X
+  Sparkles,
+  ChevronRight,
+  Search,
+  FileCheck,
+  Reply
 } from 'lucide-react';
 
+// Type definitions
 type UserMessage = {
-  sender: 'user';
+  type: 'user';
   text: string;
 };
 
 type AiMessage = {
-  sender: 'ai';
+  type: 'ai';
   text: string;
-  metadata: {
-    confidence?: number;
-    response_time?: string;
-    source?: string;
-    actions_taken?: string[];
-    contingency?: string;
+  metadata?: {
+    confidence: string;
+    responseTime: string;
+    source: string;
+    actions?: string[];
   };
 };
 
 type DemoMessage = UserMessage | AiMessage;
 
 export default function GlidiaLanding() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [activeMetric, setActiveMetric] = useState(0);
-  const [hoveredFeature, setHoveredFeature] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState(1);
-  const [activeStoryStep, setActiveStoryStep] = useState(0);
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [animatedGlitch, setAnimatedGlitch] = useState(false);
-  const [showLiveDemo, setShowLiveDemo] = useState(false);
-  const [showProductsDropdown, setShowProductsDropdown] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [demoVisible, setDemoVisible] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
   const [demoMessages, setDemoMessages] = useState<DemoMessage[]>([
-    { sender: 'user', text: "Where's my order #12345? It was supposed to arrive yesterday." }
+    { type: 'user', text: "Hi, where's my order #GLD-4821? It's been 3 days with no updates and I'm getting worried." },
   ]);
-  
-  const [demoTyping, setDemoTyping] = useState(false);
-  const [demoStage, setDemoStage] = useState(0);
-  
-  const heroRef = useRef(null);
-  const storyRef = useRef<HTMLDivElement | null>(null);
-  const testimonialRef = useRef(null);
-  const pricingRef = useRef<HTMLDivElement | null>(null);
-  const storyStepsRef = useRef([]);
-  const liveDemoRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
 
-  // Enhanced scroll effects with intersection observer
-  const handleScroll = useCallback(() => {
-    const position = window.scrollY;
-    setScrollPosition(position);
-    
-    // Auto-advance story steps based on scroll
-    const storySection = storyRef.current;
-    if (storySection) {
-      const rect = storySection.getBoundingClientRect();
-      const progress = Math.max(0, Math.min(1, -rect.top / (rect.height - window.innerHeight)));
-      const newStep = Math.floor(progress * storySteps.length);
-      if (newStep !== activeStoryStep && newStep < storySteps.length) {
-        setActiveStoryStep(newStep);
-      }
-    }
-  }, [activeStoryStep]);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
 
-  // Initialize effects
   useEffect(() => {
-    setIsVisible(true);
-    
-    window.addEventListener('scroll', handleScroll);
-    
-    // Run initial scroll check
-    handleScroll();
-    
-    // Trigger glitch animation occasionally
-    const glitchInterval = setInterval(() => {
-      setAnimatedGlitch(true);
-      setTimeout(() => setAnimatedGlitch(false), 500);
-    }, 15000);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(glitchInterval);
-    };
-  }, [handleScroll]);
-
-  // Auto-cycle metrics
-  useEffect(() => {
-    const metricsInterval = setInterval(() => {
-      setActiveMetric(prev => (prev + 1) % stats.length);
-    }, 3000);
-
-    return () => clearInterval(metricsInterval);
-  }, []);
-
-  // Process demo messages with realistic timing
-  useEffect(() => {
-    if (showLiveDemo && demoStage < 3) {
-      const stages = [
-        // Stage 1: AI response
-        () => {
-          setDemoTyping(true);
-          setTimeout(() => {
-            setDemoTyping(false);
-            setDemoMessages(prev => [
-              ...prev, 
-              { 
-                sender: 'ai', 
-                text: "Hi Sarah, I've located your order #12345. According to the tracking information, your package was actually delivered today at 2:37 PM to your front porch. There should be a confirmation photo in your email. Is there anything else I can help with?",
-                metadata: {
-                  confidence: 98.7,
-                  response_time: '1.2s',
-                  source: 'Shopify + USPS API'
-                }
-              }
-            ]);
-            setDemoStage(1);
-          }, 2500);
-        },
-        // Stage 2: User follow-up
-        () => {
-          setTimeout(() => {
-            setDemoMessages(prev => [
-              ...prev,
-              { sender: 'user', text: "I don't see it. Can you help me contact the courier?" }
-            ]);
-            setDemoStage(2);
-          }, 4000);
-        },
-        // Stage 3: AI resolution
-        () => {
-          setDemoTyping(true);
-          setTimeout(() => {
-            setDemoTyping(false);
-            setDemoMessages(prev => [
-              ...prev,
-              { 
-                sender: 'ai', 
-                text: "I've initiated a delivery investigation with USPS (ref #US7823) and notified our fulfillment team. You'll receive updates via email. If the package isn't found by tomorrow, we'll ship a replacement with expedited delivery at no cost. Would you like me to text you when I have an update?",
-                metadata: {
-                  actions_taken: ['USPS investigation', 'Team notification'],
-                  contingency: 'Replacement ready'
-                }
-              }
-            ]);
-            setDemoStage(3);
-          }, 3000);
-        }
-      ];
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
       
-      if (stages[demoStage]) {
-        stages[demoStage]();
+      // Auto-advance story steps based on scroll
+      if (storyRef.current) {
+        const rect = storyRef.current.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, -rect.top / (rect.height - window.innerHeight)));
+        const newStep = Math.floor(progress * 4);
+        if (newStep !== activeStep && newStep < 4) {
+          setActiveStep(newStep);
+        }
       }
-    }
-  }, [showLiveDemo, demoStage]);
+    };
 
-  // Stats with improved metrics
-  const stats = [
-    { 
-      value: "83%", 
-      label: "Ticket Reduction", 
-      icon: TrendingDown,
-      description: "Less support burden",
-      color: "text-red-400",
-      gradient: "from-red-500 to-red-600"
-    },
-    { 
-      value: "1.8s", 
-      label: "Response Time", 
-      icon: Clock,
-      description: "Lightning fast AI",
-      color: "text-amber-400",
-      gradient: "from-amber-400 to-amber-600"
-    },
-    { 
-      value: "99.3%", 
-      label: "Accuracy Rate", 
-      icon: Target,
-      description: "Human-level precision",
-      color: "text-emerald-400",
-      gradient: "from-emerald-500 to-emerald-600"
-    },
-    { 
-      value: "24/7", 
-      label: "Availability", 
-      icon: Shield,
-      description: "Global coverage",
-      color: "text-red-400",
-      gradient: "from-red-500 to-red-600"
-    }
-  ];
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [activeStep]);
 
-  // Enhanced story flow with Lottie-style illustrations
-  const storySteps = [
-    {
-      step: 1,
-      title: "Customer Query Detection",
-      description: "Natural language processing identifies urgent WISMO queries with contextual understanding and sentiment analysis",
-      icon: MessageSquare,
-      color: "from-red-500 to-red-600",
-      animation: "customerQuery"
-    },
-    {
-      step: 2,
-      title: "Neural Processing Engine",
-      description: "Advanced AI analyzes sentiment, urgency, customer history, and order patterns for personalized responses",
-      icon: Brain,
-      color: "from-amber-500 to-red-500",
-      animation: "neuralProcessing"
-    },
-    {
-      step: 3,
-      title: "Real-time Data Integration",
-      description: "Seamlessly connects with Shopify, carriers, payment systems, and order databases for accurate information",
-      icon: Database,
-      color: "from-amber-500 to-amber-600",
-      animation: "dataIntegration"
-    },
-    {
-      step: 4,
-      title: "Intelligent Solution Generation",
-      description: "Generates empathetic, branded responses with actionable next steps, follow-up actions, and proactive solutions",
-      icon: Send,
-      color: "from-red-500 to-red-600",
-      animation: "solutionGeneration"
+  // Enhanced demo simulation
+  useEffect(() => {
+    if (demoVisible && demoMessages.length === 1) {
+      const timer = setTimeout(() => {
+        setIsTyping(true);
+        setTimeout(() => {
+          setIsTyping(false);
+          setDemoMessages(prev => [...prev, {
+            type: 'ai',
+            text: "Hi Sarah! I've located your order #GLD-4821. It shipped yesterday via FedEx and is currently out for delivery in Chicago. Expected arrival: today by 3 PM. There was a slight weather delay, but it's on track now. I've sent updated tracking to your email with delivery photo notifications. Would you like me to text you when it arrives?",
+            metadata: {
+              confidence: "98.7%",
+              responseTime: "1.2s",
+              source: "Shopify + FedEx API",
+              actions: ["Located order", "Checked tracking", "Sent notification"]
+            }
+          }]);
+        }, 3000);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  ];
+  }, [demoVisible, demoMessages.length]);
 
-  // Enhanced testimonials
-  const testimonials = [
-    {
-      quote: "Game changer. 85% fewer tickets, team focuses on strategy now.",
-      author: "Sarah Chen",
-      role: "Head of CX",
-      company: "ModernStore",
-      avatarFallback: "SC",
-      rating: 5,
-      impact: "-85% tickets",
-      expanded: "Before Glidia, our team was drowning in WISMO tickets. Now we're focusing on CX strategy while the AI handles 85% of routine queries perfectly. The ROI was immediate and the implementation took just days."
-    },
-    {
-      quote: "Customers think they're talking to our best agents. It's incredible.",
-      author: "Marcus Rodriguez", 
-      role: "CTO",
-      company: "TechGear Pro",
-      avatarFallback: "MR",
-      rating: 5,
-      impact: "97% accuracy",
-      expanded: "We integrated Glidia with our Shopify Plus store and saw immediate results. Our customers get instant responses that perfectly match our brand voice, with personalized solutions to their order issues. The sentiment analysis is uncanny."
-    },
-    {
-      quote: "Saved $28k first month. ROI was immediate and massive.",
-      author: "Emily Zhang",
-      role: "VP Ops",
-      company: "GrowthCorp",
-      avatarFallback: "EZ",
-      rating: 5,
-      impact: "$28k saved",
-      expanded: "The cost savings exceeded our expectations immediately. We reduced our support staff needs by 60% while improving customer satisfaction scores. Glidia's AI doesn't just respond faster - it finds better solutions than our agents did."
-    }
-  ];
-
-  // Pricing plans
-  const pricingPlans = [
-    {
-      name: "Starter",
-      price: 9.99,
-      description: "Perfect for small stores",
-      responses: 100,
-      features: [
-        { text: "100 AI responses/month", available: true },
-        { text: "Basic analytics dashboard", available: true },
-        { text: "Email support", available: true },
-        { text: "Shopify integration", available: true },
-        { text: "Custom brand voice", available: false },
-        { text: "Advanced analytics", available: false }
-      ],
-      cta: "Start free trial",
-      popular: false
-    },
-    {
-      name: "Growth", 
-      price: 29.99,
-      description: "Most popular choice",
-      responses: 1000,
-      features: [
-        { text: "1,000 AI responses/month", available: true },
-        { text: "Advanced analytics dashboard", available: true },
-        { text: "Priority support", available: true },
-        { text: "Custom brand voice", available: true },
-        { text: "Performance insights", available: true },
-        { text: "API access", available: false }
-      ],
-      cta: "Start free trial",
-      popular: true
-    },
-    {
-      name: "Pro",
-      price: 79.99,
-      description: "For scaling operations",
-      responses: "unlimited",
-      features: [
-        { text: "Unlimited AI responses", available: true },
-        { text: "Advanced analytics suite", available: true },
-        { text: "Custom branding options", available: true },
-        { text: "Dedicated support team", available: true },
-        { text: "Full API access", available: true },
-        { text: "White-label options", available: true }
-      ],
-      cta: "Contact sales",
-      popular: false
-    }
-  ];
-
-  // Neural network background component
-  const NeuralNetworkBackground = () => (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <svg 
-        className="w-full h-full opacity-10" 
-        viewBox="0 0 1920 1080" 
-        preserveAspectRatio="xMidYMid slice"
-      >
-        {/* Static neural network lines */}
+  // Minimal grid background component
+  const MinimalBackground = () => (
+    <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
+      <svg className="w-full h-full" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
         <defs>
-          <pattern id="neural-grid" patternUnits="userSpaceOnUse" width="100" height="100">
-            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(239, 68, 68, 0.3)" strokeWidth="0.5"/>
+          <pattern id="minimal-grid" patternUnits="userSpaceOnUse" width="100" height="100">
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255, 255, 255, 0.03)" strokeWidth="0.5"/>
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#neural-grid)" />
-        
-        {/* Animated neural connections */}
-        <g stroke="rgba(239, 68, 68, 0.4)" strokeWidth="1" fill="none">
-          <line x1="0" y1="200" x2="400" y2="150" className="animate-pulse" style={{ animationDelay: '0s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite" />
-          </line>
-          <line x1="400" y1="150" x2="800" y2="250" className="animate-pulse" style={{ animationDelay: '0.5s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite" />
-          </line>
-          <line x1="800" y1="250" x2="1200" y2="200" className="animate-pulse" style={{ animationDelay: '1s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite" />
-          </line>
-          <line x1="1200" y1="200" x2="1600" y2="300" className="animate-pulse" style={{ animationDelay: '1.5s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite" />
-          </line>
-          
-          {/* Vertical connections */}
-          <line x1="200" y1="0" x2="150" y2="400" className="animate-pulse" style={{ animationDelay: '2s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="4s" repeatCount="indefinite" />
-          </line>
-          <line x1="600" y1="0" x2="650" y2="400" className="animate-pulse" style={{ animationDelay: '2.5s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="4s" repeatCount="indefinite" />
-          </line>
-          <line x1="1000" y1="0" x2="950" y2="400" className="animate-pulse" style={{ animationDelay: '3s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="4s" repeatCount="indefinite" />
-          </line>
-          <line x1="1400" y1="0" x2="1450" y2="400" className="animate-pulse" style={{ animationDelay: '3.5s' }}>
-            <animate attributeName="stroke-opacity" values="0.2;0.8;0.2" dur="4s" repeatCount="indefinite" />
-          </line>
-        </g>
-        
-        {/* Neural nodes */}
-        <g fill="rgba(239, 68, 68, 0.6)">
-          <circle cx="200" cy="200" r="3" className="animate-pulse" style={{ animationDelay: '0s' }} />
-          <circle cx="600" cy="150" r="3" className="animate-pulse" style={{ animationDelay: '1s' }} />
-          <circle cx="1000" cy="250" r="3" className="animate-pulse" style={{ animationDelay: '2s' }} />
-          <circle cx="1400" cy="200" r="3" className="animate-pulse" style={{ animationDelay: '3s' }} />
-          <circle cx="400" cy="350" r="3" className="animate-pulse" style={{ animationDelay: '4s' }} />
-          <circle cx="800" cy="300" r="3" className="animate-pulse" style={{ animationDelay: '5s' }} />
-          <circle cx="1200" cy="400" r="3" className="animate-pulse" style={{ animationDelay: '6s' }} />
-        </g>
+        <rect width="100%" height="100%" fill="url(#minimal-grid)" />
       </svg>
     </div>
   );
 
-  // Enhanced Navbar Component with Dropdown
-  const EnhancedNavbar = () => (
-    <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-xl border-b border-stone-800/50 z-50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-4">
+  const storySteps = [
+    {
+      step: 1,
+      title: "Customer Reaches Out",
+      description: "Sarah is anxious about her daughter's birthday gift. She opens your support widget at 11 PM, frustrated and worried about delivery timing.",
+      icon: MessageSquare,
+      illustration: (
+        <div className="relative w-full h-48 bg-stone-900/30 rounded-2xl border border-stone-800 overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative">
-              <Image 
-                src="/GlidiaLogo.png" 
-                alt="Glidia Logo" 
-                width={40} 
-                height={40} 
-                className="rounded-xl"
-              />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
-                Glidia
-              </h1>
-              <p className="text-xs text-stone-400 font-medium">AI Support Intelligence</p>
+              <div className="w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center border border-stone-700">
+                <User className="w-8 h-8 text-stone-400" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                <span className="text-black text-xs font-bold">!</span>
+              </div>
             </div>
           </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            {/* Products Dropdown */}
+          <div className="absolute bottom-4 left-4 right-4 bg-stone-800/80 backdrop-blur-sm rounded-lg p-3">
+            <p className="text-stone-300 text-xs">"Where's my order? It's been 3 days..."</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 2,
+      title: "Instant Detection & Analysis",
+      description: "Glidia's neural engine immediately recognizes this as a high-urgency WISMO query, analyzes sentiment (anxious), and prepares contextual response.",
+      icon: Brain,
+      illustration: (
+        <div className="relative w-full h-48 bg-stone-900/30 rounded-2xl border border-stone-800 overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative">
-              <button 
-                className="flex items-center space-x-1 text-stone-300 hover:text-red-400 transition-colors"
-                onMouseEnter={() => setShowProductsDropdown(true)}
-                onMouseLeave={() => setShowProductsDropdown(false)}
-              >
-                <span>Products</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
+              <Brain className="w-16 h-16 text-white animate-pulse" />
+              <div className="absolute inset-0 border-2 border-white/20 rounded-full animate-ping"></div>
+            </div>
+          </div>
+          <div className="absolute top-4 left-4 bg-stone-800/80 backdrop-blur-sm rounded-lg px-3 py-1">
+            <span className="text-white text-xs font-mono">ANALYZING...</span>
+          </div>
+          <div className="absolute bottom-4 right-4 bg-stone-800/80 backdrop-blur-sm rounded-lg px-3 py-1">
+            <span className="text-stone-300 text-xs">Sentiment: Urgent</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 3,
+      title: "Real-Time Data Gathering",
+      description: "Within milliseconds, Glidia pulls live data from Shopify, FedEx tracking, weather APIs, and delivery databases to build complete context.",
+      icon: Database,
+      illustration: (
+        <div className="relative w-full h-48 bg-stone-900/30 rounded-2xl border border-stone-800 overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Database className="w-16 h-16 text-white" />
+          </div>
+          <div className="absolute top-4 left-4 space-y-1">
+            <div className="bg-emerald-900/40 border border-emerald-500/30 rounded px-2 py-1">
+              <span className="text-emerald-300 text-xs">Shopify ✓</span>
+            </div>
+            <div className="bg-blue-900/40 border border-blue-500/30 rounded px-2 py-1">
+              <span className="text-blue-300 text-xs">FedEx ✓</span>
+            </div>
+          </div>
+          <div className="absolute bottom-4 right-4 space-y-1">
+            <div className="bg-purple-900/40 border border-purple-500/30 rounded px-2 py-1">
+              <span className="text-purple-300 text-xs">Weather ✓</span>
+            </div>
+            <div className="bg-orange-900/40 border border-orange-500/30 rounded px-2 py-1">
+              <span className="text-orange-300 text-xs">Location ✓</span>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      step: 4,
+      title: "Empathetic Response Delivered",
+      description: "Glidia crafts a personalized, empathetic response that acknowledges Sarah's concern, provides exact tracking info, explains the delay, and offers proactive follow-up.",
+      icon: Reply,
+      illustration: (
+        <div className="relative w-full h-48 bg-stone-900/30 rounded-2xl border border-stone-800 overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center">
+              <Bot className="w-8 h-8 text-black" />
+            </div>
+          </div>
+          <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3">
+            <p className="text-black text-xs">"Hi Sarah! Found your order - it's out for delivery today by 3 PM..."</p>
+          </div>
+          <div className="absolute top-4 right-4 bg-emerald-800/80 backdrop-blur-sm rounded-lg px-3 py-1">
+            <span className="text-emerald-300 text-xs font-mono">1.2s</span>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const neuralPillars = [
+    {
+      title: "Natural Language Understanding",
+      description: "Advanced transformer models decode customer intent, emotion, and urgency",
+      icon: Brain
+    },
+    {
+      title: "Real-time Data Integration", 
+      description: "Seamless connectivity with commerce platforms and logistics providers",
+      icon: Network
+    },
+    {
+      title: "Sentiment + Urgency Analysis",
+      description: "Emotional intelligence that adapts response tone and priority",
+      icon: Activity
+    },
+    {
+      title: "Brand Tone Controls",
+      description: "Maintains your unique voice while delivering consistent experiences",
+      icon: Target
+    }
+  ];
+
+  const testimonials = [
+    {
+      quote: "Reduced our support load by 87% in first month. Customers think they're talking to our best agents.",
+      author: "Sarah Chen",
+      role: "Head of Customer Experience",
+      company: "TechFlow",
+      impact: "87% reduction",
+      rating: 5
+    },
+    {
+      quote: "ROI was immediate. $45k saved monthly while improving response times from hours to seconds.",
+      author: "Marcus Rodriguez",
+      role: "VP Operations", 
+      company: "ScaleCommerce",
+      impact: "$45k saved",
+      rating: 5
+    },
+    {
+      quote: "Implementation took 2 hours. Results were instant. This is the future of customer support.",
+      author: "Emily Zhang",
+      role: "CTO",
+      company: "NextGen Retail",
+      impact: "2hr setup",
+      rating: 5
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-black text-white relative overflow-x-hidden">
+      <MinimalBackground />
+      
+      {/* Navbar */}
+      <Navbar variant="landing" showDashboardLink={true} />
+
+      {/* Centered Hero Section */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center px-6 lg:px-8 pt-24">
+        {/* Enhanced background with dashboard-style pattern */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 opacity-5">
+            <div className="w-full h-full" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '20px 20px'
+            }}></div>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10"></div>
+        </div>
+
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          {/* Brand Tag */}
+          <div className="inline-flex items-center space-x-2 px-4 py-2 border border-stone-800 rounded-full text-stone-400 text-sm font-medium mb-8">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            <span>Glidia™ AI</span>
+          </div>
+
+          {/* Main Header - Centered */}
+          <h1 className="text-6xl lg:text-8xl font-extralight leading-[0.9] tracking-tight mb-8">
+            <div className="text-white mb-3">Eliminate</div>
+            <div className="text-white mb-3">Post-Purchase</div>
+            <div className="text-stone-400 font-light">Support Chaos</div>
+          </h1>
+          
+          {/* Enhanced Subheader Box */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="bg-stone-950/60 backdrop-blur-xl border border-stone-700/50 rounded-2xl p-8">
+              <p className="text-xl lg:text-2xl text-stone-300 leading-relaxed font-light mb-6">
+                AI-powered WISMO automation that transforms frustrated customers into advocates in <span className="text-white font-medium">under 2 seconds</span>
+              </p>
               
-              {showProductsDropdown && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-64 bg-stone-900/95 backdrop-blur-xl border border-stone-700/50 rounded-xl shadow-xl z-50"
-                  onMouseEnter={() => setShowProductsDropdown(true)}
-                  onMouseLeave={() => setShowProductsDropdown(false)}
-                >
-                  <div className="p-4">
-                    <div className="mb-4">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                          <Package className="w-4 h-4 text-white" />
+              {/* Key Benefits */}
+              <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div className="space-y-2">
+                  <div className="text-3xl font-light text-white">83%</div>
+                  <div className="text-sm text-stone-400">Fewer Support Tickets</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-3xl font-light text-white">1.8s</div>
+                  <div className="text-sm text-stone-400">Average Response Time</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-3xl font-light text-white">99.3%</div>
+                  <div className="text-sm text-stone-400">Resolution Accuracy</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Glidia Care Widget Demo */}
+          <div className="max-w-2xl mx-auto">
+            {/* Demo Header */}
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-medium text-white mb-3">Experience Glidia Care</h2>
+              <p className="text-stone-400">Watch our AI handle a real customer query in real-time</p>
+            </div>
+
+            {/* Widget Container */}
+            <div className="relative">
+              {/* Background glow effect */}
+              <div className="absolute -inset-6 bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-3xl blur-2xl opacity-50"></div>
+              
+              <div className="relative bg-stone-950/80 backdrop-blur-xl border border-stone-700/50 rounded-3xl overflow-hidden shadow-2xl">
+                {/* Widget Header */}
+                <div className="bg-white text-black px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-black/10 rounded-xl flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-black" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">Glidia Care</div>
+                      <div className="text-xs text-black/60">AI Support Assistant</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 text-xs">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span className="font-medium">Live Demo</span>
+                  </div>
+                </div>
+
+                {/* Chat Messages */}
+                <div className="p-6 space-y-4 min-h-[400px]">
+                  {demoMessages.map((message, index) => (
+                    <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      {message.type === 'user' ? (
+                        <div className="max-w-sm bg-stone-800/80 border border-stone-700 rounded-2xl p-4">
+                          <p className="text-stone-100 text-sm leading-relaxed">{message.text}</p>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-white">Glidia Care</h3>
-                          <p className="text-xs text-stone-400">WISMO Automation</p>
+                      ) : (
+                        <div className="max-w-lg bg-white text-black rounded-2xl p-4 shadow-lg">
+                          <p className="text-sm leading-relaxed mb-4">{message.text}</p>
+                          
+                          {/* AI Metadata */}
+                          {message.metadata && (
+                            <>
+                              <div className="grid grid-cols-3 gap-3 text-xs mb-4 pt-3 border-t border-stone-200">
+                                <div className="flex items-center space-x-1">
+                                  <Target className="w-3 h-3 text-emerald-600" />
+                                  <span className="text-stone-600">{message.metadata.confidence}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-3 h-3 text-blue-600" />
+                                  <span className="text-stone-600">{message.metadata.responseTime}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Database className="w-3 h-3 text-purple-600" />
+                                  <span className="text-stone-600">{message.metadata.source}</span>
+                                </div>
+                              </div>
+                              
+                              {/* Actions taken */}
+                              {message.metadata.actions && (
+                                <div className="bg-stone-50 rounded-lg p-3 text-xs">
+                                  <div className="font-medium text-stone-700 mb-2">Actions Taken:</div>
+                                  <div className="space-y-1">
+                                    {message.metadata.actions.map((action, idx) => (
+                                      <div key={idx} className="text-stone-600">✓ {action}</div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Typing indicator */}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="bg-white rounded-2xl p-4 shadow-lg">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce delay-100"></div>
+                            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce delay-200"></div>
+                          </div>
+                          <span className="text-stone-500 text-xs">Glidia is analyzing...</span>
                         </div>
                       </div>
-                      <p className="text-sm text-stone-300">Automate order tracking queries with empathetic AI responses</p>
                     </div>
-                    
-                    <div className="border-t border-stone-700/50 pt-3">
-                      <p className="text-xs text-stone-500 mb-2">Coming Soon:</p>
-                      <div className="space-y-2">
-                        <div className="text-sm text-stone-400">• Glidia Engage - Proactive outreach</div>
-                        <div className="text-sm text-stone-400">• Glidia Insights - Analytics suite</div>
-                        <div className="text-sm text-stone-400">• Glidia Automate - Full automation</div>
+                  )}
+                </div>
+
+                {/* Widget Footer with Demo Controls */}
+                <div className="px-6 py-4 bg-stone-900/50 border-t border-stone-700/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <button 
+                        onClick={() => {
+                          setDemoMessages([demoMessages[0]]);
+                          setDemoVisible(true);
+                        }}
+                        disabled={isTyping}
+                        className="flex items-center space-x-2 px-3 py-1.5 bg-white text-black rounded-lg text-xs font-medium hover:bg-stone-100 transition-colors disabled:opacity-50"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Restart Demo</span>
+                      </button>
+                      <div className="text-xs text-stone-500">
+                        Powered by Glidia Neural Engine
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 text-xs text-stone-400">
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3" />
+                        <span>1.8s avg</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <TrendingDown className="w-3 h-3" />
+                        <span>83% reduction</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
-            
-            <a href="#about" className="text-stone-300 hover:text-red-400 transition-colors">About</a>
-            <a href="#contact" className="text-stone-300 hover:text-red-400 transition-colors">Contact</a>
-            <a href="#support" className="text-stone-300 hover:text-red-400 transition-colors">Support</a>
-            
-            <div className="flex items-center space-x-2 text-sm text-stone-400">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-              <span className="font-medium">AI Active</span>
-            </div>
-            
-            <button 
-              onClick={() => window.open('/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
-              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300"
-            >
-              Try For Free
-            </button>
-          </div>
-          
-          {/* Mobile menu button */}
-          <button 
-            className="md:hidden text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </div>
-      
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-xl border-t border-stone-800/50">
-          <div className="px-6 py-4 space-y-4">
-            <a href="#product" className="block text-stone-300 hover:text-red-400 transition-colors">Products</a>
-            <a href="#about" className="block text-stone-300 hover:text-red-400 transition-colors">About</a>
-            <a href="#contact" className="block text-stone-300 hover:text-red-400 transition-colors">Contact</a>
-            <a href="#support" className="block text-stone-300 hover:text-red-400 transition-colors">Support</a>
-            <button 
-              onClick={() => window.open('/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300"
-            >
-              Try For Free
-            </button>
-          </div>
-        </div>
-      )}
-    </nav>
-  );
-
-  // Render custom glitch effect
-    const renderGlitchText = (text: string, isActive = false) => (
-    <div className="relative inline-block">
-      <span className={`relative z-10 ${isActive ? 'text-transparent' : ''}`}>{text}</span>
-      {isActive && (
-        <>
-          <span className="absolute top-0 left-0 text-red-500 opacity-70 z-20 animate-pulse">{text}</span>
-          <span className="absolute top-0 left-0 text-amber-500 opacity-70 z-20 animate-pulse">{text}</span>
-        </>
-      )}
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-black text-stone-100 relative">
-      {/* Neural Network Background */}
-      <NeuralNetworkBackground />
-      
-      {/* Global Styles */}
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        
-        @keyframes ping {
-          75%, 100% {
-            transform: scale(2);
-            opacity: 0;
-          }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .animate-slideInLeft {
-          animation: slideInLeft 0.8s ease-out forwards;
-        }
-        
-        .animate-slideInRight {
-          animation: slideInRight 0.8s ease-out forwards;
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-400 { animation-delay: 400ms; }
-        .delay-500 { animation-delay: 500ms; }
-        .delay-600 { animation-delay: 600ms; }
-        .delay-700 { animation-delay: 700ms; }
-        .delay-800 { animation-delay: 800ms; }
-      `}</style>
-
-      {/* Enhanced Navbar */}
-     <Navbar variant="landing" showDashboardLink={true} />
-
-      {/* Hero Section */}
-      <section 
-        ref={heroRef} 
-        className="relative min-h-screen pt-28 pb-20 px-6 lg:px-8 flex items-center"
-      >
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/10 via-black to-amber-900/10 z-10"></div>
-        
-        <div className="max-w-7xl mx-auto w-full relative z-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Hero Content */}
-<div className="opacity-0 animate-slideInLeft z-30 relative">
-  <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-red-900/60 border border-red-600/50 text-red-300 text-sm font-medium mb-8 backdrop-blur-sm shadow-lg">
-    <Sparkles className="w-4 h-4" />
-    <span>Glidia AI</span>
-    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-  </div>
-  
-  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight relative z-10">
-    <span className="block">Eliminate</span>
-    <span className="block bg-gradient-to-r from-red-400 via-red-500 to-amber-500 bg-clip-text text-transparent">
-      Customer Support
-    </span>
-    <span className="block text-stone-200">
-      Chaos Forever
-    </span>
-  </h1>
-              
-              <p className="text-xl text-stone-300 mb-8 max-w-xl leading-relaxed">
-                AI-powered WISMO automation that transforms frustrated customers into satisfied advocates. 
-                <span className="text-red-400 font-semibold"> Reduce tickets by 83%</span> with empathetic, intelligent responses.
-              </p>
-
-              {/* Credibility Blurb */}
-              <div className="mb-10 p-4 bg-stone-900/50 rounded-lg border border-stone-700/30 backdrop-blur-sm">
-                <p className="text-stone-300 text-sm">
-                  <span className="text-red-400 font-semibold">Powered by Glidia Neural Engine:</span> Advanced AI that understands context, 
-                  sentiment, and urgency to deliver human-like customer support at scale.
-                </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12">
-                <button 
-                  onClick={() => setShowLiveDemo(true)}
-                  className="group bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center space-x-3 shadow-lg shadow-red-500/25"
-                >
-                  <Play className="w-5 h-5" />
-                  <span>Try Live Demo</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button 
-                  onClick={() => pricingRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group bg-stone-800/60 text-stone-200 px-8 py-4 rounded-lg font-semibold hover:bg-stone-700/60 border border-stone-600/30 transition-all duration-300 flex items-center space-x-3 backdrop-blur-sm"
-                >
-                 <DollarSign className="w-5 h-5" />
-                 <span>View Pricing</span>
-               </button>
-             </div>
+              {/* Floating Performance Indicators */}
+              <div className="absolute -top-3 -right-3 bg-black/90 backdrop-blur-xl border border-stone-700/50 rounded-2xl px-3 py-2 text-xs">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-3 h-3 text-white" />
+                  <span className="text-white">AI Powered</span>
+                </div>
+              </div>
+            </div>
 
-             {/* Enhanced Metrics - Sleeker Cards */}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               {stats.map((stat, index) => {
-                 const Icon = stat.icon;
-                 const isActive = activeMetric === index;
-                 return (
-                   <div 
-                     key={index} 
-                     className={`relative group cursor-pointer transition-all duration-500 bg-gradient-to-br from-stone-900/80 to-black/80 backdrop-blur-sm border border-stone-700/40 rounded-xl p-5 hover:border-red-500/30 ${
-                       isActive ? 'transform scale-105 border-red-500/50 shadow-lg shadow-red-500/10' : ''
-                     }`}
-                     onMouseEnter={() => setActiveMetric(index)}
-                   >
-                     {/* Sleek gradient overlay */}
-                     <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${stat.gradient} opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-5' : 'group-hover:opacity-5'}`}></div>
-                     
-                     <div className={`relative z-10 w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-all duration-300 ${
-                       isActive 
-                         ? `bg-gradient-to-r ${stat.gradient} shadow-lg` 
-                         : 'bg-stone-800/80'
-                     }`}>
-                       <Icon className={`w-5 h-5 transition-colors duration-300 ${
-                         isActive ? 'text-white' : stat.color
-                       }`} />
-                     </div>
-                     <div className={`relative z-10 text-2xl font-bold mb-1 transition-all duration-300 ${
-                       isActive ? 'text-white' : stat.color
-                     }`}>
-                       {stat.value}
-                     </div>
-                     <div className="relative z-10 text-sm font-medium text-stone-300 mb-1">{stat.label}</div>
-                     <div className="relative z-10 text-xs text-stone-400">{stat.description}</div>
-                   </div>
-                 );
-               })}
-             </div>
-           </div>
-           
-           {/* Interactive Demo Panel */}
-           <div className="opacity-0 animate-slideInRight delay-200">
-             <div className="relative">
-               {/* Demo Container */}
-               <div className="bg-gradient-to-br from-stone-900/90 to-black/90 rounded-2xl border border-stone-700/50 shadow-2xl backdrop-blur-sm overflow-hidden">
-                 {/* Demo Header */}
-                 <div className="bg-stone-800/80 px-6 py-4 flex items-center justify-between border-b border-stone-700/50">
-                   <div className="flex space-x-2">
-                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                     <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                     <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                   </div>
-                   <div className="text-stone-300 text-sm font-mono">glidia-neural-engine</div>
-                   <div className="flex items-center text-sm text-emerald-400">
-                     <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
-                     Live
-                   </div>
-                 </div>
-                 
-                 {/* Demo Content */}
-                 <div className="p-6">
-                   {/* Status Bar */}
-                   <div className="flex items-center justify-between mb-6 bg-stone-800/50 rounded-lg p-4 border border-stone-700/30">
-                     <div className="flex items-center space-x-3">
-                       <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                         <Bot className="w-5 h-5 text-white" />
-                       </div>
-                       <div>
-                         <h3 className="font-semibold text-white">Glidia Care</h3>
-                         <div className="flex items-center text-sm">
-                           <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
-                           <span className="text-emerald-400">Processing queries</span>
-                         </div>
-                       </div>
-                     </div>
-                     <div className="text-right">
-                       <div className="text-xs text-stone-400">Response Time</div>
-                       <div className="text-lg font-mono text-emerald-400">1.8s</div>
-                     </div>
-                   </div>
-                   
-                   {/* Chat Interface - Fixed positioning */}
-                   <div className="space-y-4 mb-6 h-80 overflow-y-auto">
-                     {demoMessages.map((msg, idx) => (
-                       <div 
-                         key={idx} 
-                         className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                       >
-                         <div className={`max-w-xs rounded-xl p-4 ${
-                           msg.sender === 'user' 
-                             ? 'bg-stone-700/80 text-white' 
-                             : 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-                         }`}>
-                           <p className="text-sm leading-relaxed">{msg.text}</p>
-                           
-                           {msg.sender === 'ai' && msg.metadata && (
-                             <div className="mt-3 pt-3 border-t border-white/20 space-y-1">
-                               {Object.entries(msg.metadata).map(([key, value]) => (
-                                 <div key={key} className="text-xs flex justify-between">
-                                   <span className="text-red-100">{key.replace('_', ' ')}:</span>
-                                   <span className="font-mono">{Array.isArray(value) ? value.join(', ') : value}</span>
-                                 </div>
-                               ))}
-                             </div>
-                           )}
-                         </div>
-                       </div>
-                     ))}
-                     
-                     {demoTyping && (
-                       <div className="flex justify-start">
-                         <div className="bg-red-500/50 rounded-xl p-4">
-                           <div className="flex space-x-1">
-                             <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                             <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-100"></div>
-                             <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-200"></div>
-                           </div>
-                         </div>
-                       </div>
-                     )}
-                   </div>
-                   
-                   {/* Demo Controls */}
-                   <div className="pt-4 border-t border-stone-700/30">
-                     {!showLiveDemo ? (
-                       <button 
-                         onClick={() => setShowLiveDemo(true)}
-                         className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center justify-center space-x-3"
-                       >
-                         <Play className="w-4 h-4" />
-                         <span>Run Live Demo</span>
-                       </button>
-                     ) : demoStage < 3 ? (
-                       <div className="text-center text-stone-400">
-                         <div className="flex items-center justify-center space-x-2">
-                           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                           <span>Demo running... Stage {demoStage + 1}/3</span>
-                         </div>
-                       </div>
-                     ) : (
-                       <button 
-                         onClick={() => {
-                           setDemoMessages([
-                             { sender: 'user', text: "Where's my order #12345? It was supposed to arrive yesterday." }
-                           ]);
-                           setDemoStage(0);
-                           setShowLiveDemo(false);
-                         }}
-                         className="w-full bg-stone-700/80 text-white px-6 py-3 rounded-lg font-semibold hover:bg-stone-600/80 transition-all duration-300 flex items-center justify-center space-x-3"
-                       >
-                         <RefreshCw className="w-4 h-4" />
-                         <span>Restart Demo</span>
-                       </button>
-                     )}
-                   </div>
-                 </div>
-               </div>
-               
-               {/* Floating Performance Badges */}
-               <div className="absolute -top-4 -right-4 bg-stone-800/90 text-white px-4 py-2 rounded-full text-sm font-medium border border-stone-600/50 shadow-lg backdrop-blur-sm animate-float">
-                 <div className="flex items-center space-x-2">
-                   <Clock className="w-4 h-4 text-emerald-400" />
-                   <span>1.8s avg response</span>
-                 </div>
-               </div>
-               
-               <div className="absolute -bottom-4 -left-4 bg-stone-800/90 text-white px-4 py-2 rounded-full text-sm font-medium border border-stone-600/50 shadow-lg backdrop-blur-sm animate-float delay-500">
-                 <div className="flex items-center space-x-2">
-                   <TrendingDown className="w-4 h-4 text-red-400" />
-                   <span>83% fewer tickets</span>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-     </section>
+            {/* CTA Buttons */}
+            <div className="flex items-center justify-center space-x-4 mt-12">
+              <button 
+                onClick={() => window.open('/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
+                className="group px-8 py-4 bg-white text-black rounded-xl font-medium hover:bg-stone-100 transition-all duration-300 flex items-center space-x-3"
+              >
+                <Play className="w-5 h-5" />
+                <span>Try Full Dashboard</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+              <button 
+                onClick={() => setDemoVisible(true)}
+                className="px-8 py-4 border border-stone-700 text-stone-300 rounded-xl font-medium hover:border-stone-600 hover:text-white transition-all duration-300"
+              >
+                Watch Demo Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-     {/* Glidia Care Product Section - Illustrative Story */}
-     <section 
-       id="product"
-       className="py-24 px-6 lg:px-8 bg-gradient-to-br from-black to-stone-900 relative overflow-hidden"
-     >
-       <div className="absolute inset-0">
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(239,68,68,0.1),transparent_50%)]"></div>
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.1),transparent_50%)]"></div>
-       </div>
-       
-       <div className="max-w-7xl mx-auto relative z-10">
-         <div className="text-center mb-20">
-           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-900/40 to-amber-900/40 border border-red-700/30 text-red-300 text-sm font-medium mb-6 backdrop-blur-sm">
-             <Package className="w-4 h-4" />
-             <span>Glidia Care</span>
-           </div>
-           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 opacity-0 animate-fadeInUp">
-             Meet <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">Glidia Care</span>
-             <br />Your WISMO Solution
-           </h2>
-           <p className="text-xl text-stone-300 max-w-3xl mx-auto opacity-0 animate-fadeInUp delay-200">
-             Our flagship product that automates WISMO (Where Is My Order?) and WISMR (Where Is My Refund?) queries 
-             with AI-powered empathy and real-time data integration.
-           </p>
-         </div>
+      {/* Vertical Storytelling Section */}
+      <section ref={storyRef} className="py-32 px-6 lg:px-8 relative bg-black">
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-24">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 border border-stone-800 rounded-full text-stone-400 text-sm font-medium mb-8">
+              <Package className="w-4 h-4" />
+              <span>How Glidia Care Works</span>
+            </div>
+            <h2 className="text-5xl lg:text-6xl font-light mb-8">
+              From <span className="text-white">Frustrated Query</span><br />
+              to <span className="text-white">Happy Customer</span>
+            </h2>
+            <p className="text-xl text-stone-500 max-w-3xl mx-auto leading-relaxed font-light">
+              Watch how our AI transforms a real customer support interaction in real-time
+            </p>
+          </div>
 
-         {/* Story Timeline - Illustrative Process */}
-         <div className="relative mb-20">
-           {/* Timeline Line */}
-           <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-red-500 via-amber-500 to-red-500 opacity-30"></div>
-           
-           <div className="space-y-20">
-             {/* Story Step 1 */}
-             <div className="flex items-center justify-between">
-               <div className="w-5/12 opacity-0 animate-slideInLeft delay-100">
-                 <div className="bg-gradient-to-br from-stone-800/80 to-stone-900/80 rounded-2xl p-8 border border-stone-700/30">
-                   <div className="flex items-center space-x-4 mb-4">
-                     <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                       <User className="w-6 h-6 text-white" />
-                     </div>
-                     <div>
-                       <h3 className="text-xl font-bold text-white">Customer Frustration</h3>
-                       <p className="text-stone-400">The journey begins</p>
-                     </div>
-                   </div>
-                   <p className="text-stone-300 leading-relaxed">
-                     Sarah ordered a gift for her daughter's birthday. It's been a week with no updates. 
-                     She's frustrated, worried, and reaching out for help at 11 PM.
-                   </p>
-                 </div>
-               </div>
-               
-               <div className="w-2/12 flex justify-center">
-                 <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center relative z-10">
-                   <span className="text-white font-bold text-sm">1</span>
-                 </div>
-               </div>
-               
-               <div className="w-5/12">
-                 <div className="bg-stone-800/50 rounded-xl p-6 border border-stone-700/30">
-                   <div className="text-stone-300 text-sm italic">
-                     "Hi, I ordered a birthday gift last week (Order #12345) but haven't received any updates. 
-                     My daughter's party is tomorrow and I'm really worried it won't arrive in time. Can someone please help me?"
-                   </div>
-                   <div className="mt-3 text-xs text-stone-500">Customer: Sarah M. | Time: 11:07 PM</div>
-                 </div>
-               </div>
-             </div>
+          {/* Vertical Story Timeline */}
+          <div className="space-y-24">
+            {storySteps.map((step, index) => (
+              <div 
+                key={index}
+                className={`relative transition-all duration-1000 ${
+                  activeStep >= index ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-12'
+                }`}
+              >
+                {/* Connection line */}
+                {index < storySteps.length - 1 && (
+                  <div className="absolute left-8 top-24 w-px h-24 bg-stone-800"></div>
+                )}
+                
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                  {/* Step content */}
+                  <div className={`space-y-6 ${index % 2 === 1 ? 'lg:order-2' : ''}`}>
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-16 h-16 rounded-2xl border-2 flex items-center justify-center transition-all duration-500 ${
+                        activeStep >= index 
+                          ? 'border-white bg-white text-black' 
+                          : 'border-stone-700 text-stone-400'
+                      }`}>
+                        <step.icon className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <div className="text-sm text-stone-500 font-medium">Step {step.step}</div>
+                        <h3 className="text-2xl font-medium text-white">{step.title}</h3>
+                      </div>
+                    </div>
+                    <p className="text-stone-400 text-lg leading-relaxed font-light">
+                      {step.description}
+                    </p>
+                  </div>
 
-             {/* Story Step 2 */}
-             <div className="flex items-center justify-between">
-               <div className="w-5/12">
-                 <div className="bg-gradient-to-br from-amber-900/30 to-red-900/30 rounded-xl p-6 border border-amber-700/30">
-                   <div className="grid grid-cols-3 gap-3 mb-4">
-                     <div className="text-center">
-                       <div className="w-8 h-8 bg-amber-500 rounded-full mx-auto mb-2 flex items-center justify-center">
-                         <Brain className="w-4 h-4 text-white" />
-                       </div>
-                       <div className="text-xs text-amber-300">NLP Analysis</div>
-                     </div>
-                     <div className="text-center">
-                       <div className="w-8 h-8 bg-red-500 rounded-full mx-auto mb-2 flex items-center justify-center animate-pulse">
-                         <Activity className="w-4 h-4 text-white" />
-                       </div>
-                       <div className="text-xs text-red-300">Sentiment: Urgent</div>
-                     </div>
-                     <div className="text-center">
-                       <div className="w-8 h-8 bg-emerald-500 rounded-full mx-auto mb-2 flex items-center justify-center">
-                         <Target className="w-4 h-4 text-white" />
-                       </div>
-                       <div className="text-xs text-emerald-300">Context: WISMO</div>
-                     </div>
-                   </div>
-                   <div className="text-center text-stone-400 text-sm">
-                     Processing query in 0.3 seconds...
-                   </div>
-                 </div>
-               </div>
-               
-               <div className="w-2/12 flex justify-center">
-                 <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center relative z-10">
-                   <span className="text-white font-bold text-sm">2</span>
-                 </div>
-               </div>
-               
-               <div className="w-5/12 opacity-0 animate-slideInRight delay-300">
-                 <div className="bg-gradient-to-br from-stone-800/80 to-stone-900/80 rounded-2xl p-8 border border-stone-700/30">
-                   <div className="flex items-center space-x-4 mb-4">
-                     <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-red-500 rounded-xl flex items-center justify-center">
-                       <Brain className="w-6 h-6 text-white" />
-                     </div>
-                     <div>
-                       <h3 className="text-xl font-bold text-white">Neural Processing</h3>
-                       <p className="text-stone-400">AI understands context</p>
-                     </div>
-                   </div>
-                   <p className="text-stone-300 leading-relaxed">
-                     Glidia's neural engine instantly recognizes this is a time-sensitive WISMO query. 
-                     It detects urgency, emotional state, and prepares to gather order information.
-                   </p>
-                 </div>
-               </div>
-             </div>
+                  {/* Illustration */}
+                  <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
+                    {step.illustration}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-             {/* Story Step 3 */}
-             <div className="flex items-center justify-between">
-               <div className="w-5/12 opacity-0 animate-slideInLeft delay-500">
-                 <div className="bg-gradient-to-br from-stone-800/80 to-stone-900/80 rounded-2xl p-8 border border-stone-700/30">
-                   <div className="flex items-center space-x-4 mb-4">
-                     <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                       <Database className="w-6 h-6 text-white" />
-                     </div>
-                     <div>
-                       <h3 className="text-xl font-bold text-white">Data Integration</h3>
-                       <p className="text-stone-400">Real-time lookup</p>
-                     </div>
-                   </div>
-                   <p className="text-stone-300 leading-relaxed">
-                     Within seconds, Glidia connects to Shopify, checks UPS tracking, 
-                     reviews delivery notes, and cross-references weather delays in Sarah's area.
-                   </p>
-                 </div>
-               </div>
-               
-               <div className="w-2/12 flex justify-center">
-                 <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center relative z-10">
-                   <span className="text-white font-bold text-sm">3</span>
-                 </div>
-               </div>
-               
-               <div className="w-5/12">
-                 <div className="bg-gradient-to-br from-emerald-900/30 to-stone-900/30 rounded-xl p-6 border border-emerald-700/30">
-                   <div className="space-y-3">
-                     <div className="flex items-center justify-between p-3 bg-emerald-800/20 rounded-lg">
-                       <span className="text-emerald-300 text-sm">Shopify Order Status</span>
-                       <span className="text-white font-mono text-xs">✓ Shipped</span>
-                     </div>
-                     <div className="flex items-center justify-between p-3 bg-emerald-800/20 rounded-lg">
-                       <span className="text-emerald-300 text-sm">UPS Tracking</span>
-                       <span className="text-white font-mono text-xs">✓ Out for delivery</span>
-                     </div>
-                     <div className="flex items-center justify-between p-3 bg-amber-800/20 rounded-lg">
-                       <span className="text-amber-300 text-sm">Weather Check</span>
-                       <span className="text-white font-mono text-xs">! Delay possible</span>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
+          {/* Results summary */}
+          <div className="mt-32 text-center">
+            <div className="bg-stone-950/60 backdrop-blur-xl border border-stone-700/50 rounded-3xl p-12">
+              <h3 className="text-3xl font-light text-white mb-8">The Result</h3>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="text-center">
+                  <div className="text-4xl font-light text-white mb-2">1.2s</div>
+                  <div className="text-stone-400">Total resolution time</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-light text-white mb-2">100%</div>
+                  <div className="text-stone-400">Customer satisfaction</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-light text-white mb-2">$0</div>
+                  <div className="text-stone-400">Human agent cost</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-             {/* Story Step 4 */}
-             <div className="flex items-center justify-between">
-               <div className="w-5/12">
-                 <div className="bg-gradient-to-br from-red-900/30 to-amber-900/30 rounded-xl p-6 border border-red-700/30">
-                   <div className="text-white text-sm leading-relaxed">
-                     "Hi Sarah! I have great news about order #12345. Your package is actually out for delivery today 
-                     and should arrive by 3 PM - perfect timing for the party! 🎉 
-                     <br /><br />
-                     I can see there was a slight delay due to yesterday's weather, but UPS confirmed delivery today. 
-                     I've sent you a text with the tracking link so you can watch it in real-time. 
-                     <br /><br />
-                     If it doesn't arrive by 4 PM, I'll immediately escalate to expedited replacement. 
-                     Would you like me to text you when it's delivered?"
-                   </div>
-                   <div className="mt-4 text-xs text-red-300">Response time: 1.8 seconds | Confidence: 98.7%</div>
-                 </div>
-               </div>
-               
-               <div className="w-2/12 flex justify-center">
-                 <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center relative z-10">
-                   <span className="text-white font-bold text-sm">4</span>
-                 </div>
-               </div>
-               
-               <div className="w-5/12 opacity-0 animate-slideInRight delay-700">
-                 <div className="bg-gradient-to-br from-stone-800/80 to-stone-900/80 rounded-2xl p-8 border border-stone-700/30">
-                   <div className="flex items-center space-x-4 mb-4">
-                     <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                       <Heart className="w-6 h-6 text-white" />
-                     </div>
-                     <div>
-                       <h3 className="text-xl font-bold text-white">Happy Customer</h3>
-                       <p className="text-stone-400">Problem solved instantly</p>
-                     </div>
-                   </div>
-                   <p className="text-stone-300 leading-relaxed">
-                     Sarah goes from frustrated to relieved in under 2 seconds. The party is saved, 
-                     trust is restored, and she becomes a brand advocate. No human agent needed.
-                   </p>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
+      {/* Neural Engine Section */}
+      <section className="py-32 px-6 lg:px-8 bg-stone-950 relative">
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-24">
+            <div className="inline-flex items-center space-x-2 px-3 py-1.5 border border-stone-800 rounded-full text-stone-400 text-sm font-medium mb-8">
+              <Cpu className="w-4 h-4" />
+              <span>Neural Engine</span>
+            </div>
+            <h2 className="text-5xl lg:text-6xl font-light mb-8">
+              The <span className="text-white">Intelligence</span><br />
+              Behind It All
+            </h2>
+            <p className="text-xl text-stone-500 max-w-3xl mx-auto leading-relaxed font-light">
+              Advanced AI architecture that powers human-like understanding at enterprise scale.
+            </p>
+          </div>
 
-         {/* Results Summary */}
-         <div className="bg-gradient-to-br from-stone-800/30 to-stone-900/30 rounded-3xl p-8 lg:p-12 border border-stone-600/30 backdrop-blur-sm opacity-0 animate-fadeInUp delay-800">
-           <div className="text-center mb-8">
-             <h3 className="text-3xl font-bold text-white mb-4">The Glidia Care Difference</h3>
-             <p className="text-lg text-stone-300">From frustration to satisfaction in 1.8 seconds</p>
-           </div>
-           
-           <div className="grid md:grid-cols-4 gap-6">
-             {[
-               { label: "Response Time", value: "1.8s", desc: "vs 2-24 hours human", icon: Clock, color: "from-red-500 to-red-600" },
-               { label: "Customer Satisfaction", value: "96%", desc: "Happy customers", icon: Heart, color: "from-emerald-500 to-emerald-600" },
-               { label: "Accuracy Rate", value: "99.3%", desc: "Correct solutions", icon: Target, color: "from-amber-500 to-amber-600" },
-               { label: "Cost Savings", value: "$28k", desc: "Per month average", icon: DollarSign, color: "from-red-500 to-amber-500" }
-             ].map((metric, index) => {
-               const Icon = metric.icon;
-               return (
-                 <div key={index} className="text-center">
-                   <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-r ${metric.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                     <Icon className="w-8 h-8 text-white" />
-                   </div>
-                   <div className="text-3xl font-bold text-white mb-1">{metric.value}</div>
-                   <div className="text-sm font-medium text-stone-300 mb-1">{metric.label}</div>
-                   <div className="text-xs text-stone-400">{metric.desc}</div>
-                 </div>
-               );
-             })}
-           </div>
+          {/* Clean Pillars */}
+          <div className="grid lg:grid-cols-4 gap-8">
+            {neuralPillars.map((pillar, index) => {
+              const Icon = pillar.icon;
+              return (
+                <div key={index} className="relative group">
+                  <div className="bg-black/20 border border-stone-800 rounded-2xl p-8 h-full hover:border-stone-700 transition-all duration-300">
+                    <div className="w-10 h-10 border border-stone-700 rounded-xl flex items-center justify-center mb-6">
+                      <Icon className="w-5 h-5 text-stone-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-white mb-4">{pillar.title}</h3>
+                    <p className="text-stone-500 text-sm leading-relaxed font-light">{pillar.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-           <div className="text-center mt-8">
-             <button 
-               onClick={() => window.open('/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
-               className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center space-x-3 mx-auto"
-             >
-               <Play className="w-5 h-5" />
-               <span>Experience Glidia Care</span>
-               <ArrowRight className="w-5 h-5" />
-             </button>
-           </div>
-         </div>
-       </div>
-     </section>
+      {/* Testimonials */}
+      <section className="py-32 px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-24">
+            <h2 className="text-5xl lg:text-6xl font-light mb-8">
+              Trusted by <span className="text-white">Industry Leaders</span>
+            </h2>
+          </div>
 
-     {/* Enhanced Neural Processing Story Section */}
-     <section 
-       id="how-it-works"
-       ref={storyRef}
-       className="py-24 px-6 lg:px-8 bg-gradient-to-br from-stone-900 to-black relative overflow-hidden"
-     >
-       {/* Enhanced Neural Background */}
-       <div className="absolute inset-0">
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.1),transparent_60%)]"></div>
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.1),transparent_50%)]"></div>
-       </div>
-       
-       <div className="max-w-7xl mx-auto relative z-10">
-         <div className="text-center mb-20">
-           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-900/40 to-amber-900/40 border border-red-700/30 text-red-300 text-sm font-medium mb-6 backdrop-blur-sm">
-             <Cpu className="w-4 h-4" />
-             <span>Neural Processing Engine</span>
-           </div>
-           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 opacity-0 animate-fadeInUp">
-             From Query to Solution
-             <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent"> in Seconds</span>
-           </h2>
-           <p className="text-xl text-stone-300 max-w-3xl mx-auto opacity-0 animate-fadeInUp delay-200">
-             Watch how our advanced neural network transforms customer queries into empathetic, 
-             actionable solutions through intelligent processing
-           </p>
-         </div>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-stone-950/50 border border-stone-800 rounded-2xl overflow-hidden">
+                <div className="h-px bg-white"></div>
+                <div className="p-8">
+                  {/* Rating */}
+                  <div className="flex items-center space-x-1 mb-6">
+                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-white fill-current" />
+                    ))}
+                  </div>
+                  
+                  {/* Quote */}
+                  <blockquote className="text-white text-lg leading-relaxed mb-6 font-light">
+                    "{testimonial.quote}"
+                  </blockquote>
+                  
+                  {/* Impact */}
+                  <div className="inline-flex px-3 py-1 border border-stone-700 text-stone-300 rounded-full text-sm font-medium mb-6">
+                    {testimonial.impact}
+                  </div>
+                  
+                  {/* Author */}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-medium text-sm">
+                      {testimonial.author.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <div className="font-medium text-white">{testimonial.author}</div>
+                      <div className="text-stone-500 text-sm">{testimonial.role}, {testimonial.company}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-         {/* Interactive Story Timeline */}
-         <div className="relative">
-           {/* Progress Line */}
-           <div className="hidden lg:block absolute top-32 left-0 right-0 h-0.5 bg-stone-700/50">
-             <div 
-               className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-1000 ease-out"
-               style={{ width: `${((activeStoryStep + 1) / storySteps.length) * 100}%` }}
-             ></div>
-           </div>
+      {/* Final CTA */}
+      <section className="py-32 px-6 lg:px-8 bg-stone-950 relative">
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <h2 className="text-5xl lg:text-6xl font-light mb-8">
+            Transform Your Support Experience
+          </h2>
+          <p className="text-xl text-stone-500 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+            Join 500+ brands delivering exceptional customer experiences with AI
+          </p>
+          
+          <div className="flex items-center justify-center space-x-4">
+            <button 
+              onClick={() => window.open('http://localhost:3000/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
+              className="px-8 py-4 bg-white text-black rounded font-medium hover:bg-stone-100 transition-colors duration-200"
+            >
+              Start Free Trial
+            </button>
+            <button className="px-8 py-4 border border-stone-800 text-stone-300 rounded font-medium hover:border-stone-700 hover:text-white transition-all duration-200">
+              Schedule Demo
+            </button>
+          </div>
+        </div>
+      </section>
 
-           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
-             {storySteps.map((step, index) => {
-               const Icon = step.icon;
-               const isActive = activeStoryStep === index;
-               const isCompleted = activeStoryStep > index;
-               
-               return (
-                 <div 
-                   key={index}
-                   className={`relative opacity-0 animate-fadeInUp group cursor-pointer transition-all duration-700 ${
-                     isActive ? 'lg:scale-110' : ''
-                   }`}
-                   style={{ animationDelay: `${index * 200}ms` }}
-                   onClick={() => setActiveStoryStep(index)}
-                 >
-                   {/* Step Card */}
-                   <div className={`relative bg-gradient-to-br from-stone-800/80 to-stone-900/80 backdrop-blur-sm rounded-2xl p-8 border transition-all duration-500 ${
-                     isActive 
-                       ? 'border-red-500/50 shadow-xl shadow-red-500/10 bg-gradient-to-br from-stone-800 to-red-900/20' 
-                       : isCompleted
-                       ? 'border-amber-500/30 bg-gradient-to-br from-stone-800/90 to-amber-900/10'
-                       : 'border-stone-600/30 hover:border-stone-500/50'
-                   }`}>
-                    {/* Step Number Indicator */}
-                     <div className={`absolute -top-6 left-8 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-500 ${
-                       isActive
-                         ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30'
-                         : isCompleted
-                         ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                         : 'bg-stone-700/80 text-stone-300'
-                     }`}>
-                       {isCompleted && !isActive ? (
-                         <CheckCircle className="w-6 h-6" />
-                       ) : (
-                         step.step
-                       )}
-                     </div>
-                     
-                     {/* Icon */}
-                     <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-6 transition-all duration-500 ${
-                       isActive
-                         ? `bg-gradient-to-r ${step.color} shadow-lg`
-                         : 'bg-stone-700/50'
-                     }`}>
-                       <Icon className={`w-8 h-8 transition-colors duration-500 ${
-                         isActive ? 'text-white' : 'text-stone-300'
-                       }`} />
-                     </div>
-                     
-                     {/* Content */}
-                     <h3 className={`font-bold text-xl mb-4 transition-colors duration-500 ${
-                       isActive ? 'text-white' : 'text-stone-200'
-                     }`}>
-                       {step.title}
-                     </h3>
-                     
-                     <p className={`text-sm leading-relaxed transition-colors duration-500 ${
-                       isActive ? 'text-stone-200' : 'text-stone-400'
-                     }`}>
-                       {step.description}
-                     </p>
-                     
-                     {/* Interactive Animation */}
-                     <div className="mt-6 h-32 flex items-center justify-center">
-                       {isActive && (
-                         <div className="relative w-full h-full">
-                           {/* Custom animated illustration based on step */}
-                           {step.animation === 'customerQuery' && (
-                             <div className="relative w-full h-full flex items-center justify-center">
-                               <div className="relative">
-                                 <MessageSquare className="w-16 h-16 text-red-400 animate-pulse" />
-                                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
-                                   <span className="text-white text-xs font-bold">!</span>
-                                 </div>
-                               </div>
-                               <div className="absolute inset-0 border-2 border-red-400/20 rounded-full animate-ping"></div>
-                             </div>
-                           )}
-                           
-                           {step.animation === 'neuralProcessing' && (
-                             <div className="relative w-full h-full">
-                               <Brain className="w-16 h-16 text-amber-400 mx-auto animate-pulse" />
-                               <div className="absolute inset-0 flex items-center justify-center">
-                                 <div className="grid grid-cols-3 gap-2 absolute">
-                                   {Array.from({ length: 9 }).map((_, i) => (
-                                     <div 
-                                       key={i}
-                                       className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"
-                                       style={{ animationDelay: `${i * 100}ms` }}
-                                     ></div>
-                                   ))}
-                                 </div>
-                               </div>
-                             </div>
-                           )}
-                           
-                           {step.animation === 'dataIntegration' && (
-                             <div className="relative w-full h-full flex items-center justify-center">
-                               <Database className="w-16 h-16 text-emerald-400 animate-pulse" />
-                               <div className="absolute -top-4 -left-4 w-6 h-6 bg-blue-500 rounded-full animate-ping"></div>
-                               <div className="absolute -top-4 -right-4 w-6 h-6 bg-green-500 rounded-full animate-ping" style={{ animationDelay: '500ms' }}></div>
-                               <div className="absolute -bottom-4 w-6 h-6 bg-purple-500 rounded-full animate-ping" style={{ animationDelay: '1000ms' }}></div>
-                             </div>
-                           )}
-                           
-                           {step.animation === 'solutionGeneration' && (
-                             <div className="relative w-full h-full flex items-center justify-center">
-                               <Send className="w-16 h-16 text-red-400 animate-bounce" />
-                               <div className="absolute top-0 right-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center animate-pulse">
-                                 <CheckCircle className="w-5 h-5 text-white" />
-                               </div>
-                             </div>
-                           )}
-                         </div>
-                       )}
-                     </div>
-                     
-                     {/* Progress Indicator */}
-                     <div className="mt-4 w-full bg-stone-700/30 rounded-full h-1">
-                       <div 
-                         className={`h-full rounded-full transition-all duration-1000 ${
-                           isCompleted || isActive ? `bg-gradient-to-r ${step.color}` : 'bg-stone-600/50'
-                         }`}
-                         style={{ 
-                           width: isCompleted ? '100%' : isActive ? '75%' : '0%' 
-                         }}
-                       ></div>
-                     </div>
-                   </div>
-                 </div>
-               );
-             })}
-           </div>
-         </div>
-         
-         {/* Story Navigation */}
-         <div className="mt-16 flex justify-center">
-           <div className="flex space-x-2">
-             {storySteps.map((_, index) => (
-               <button
-                 key={index}
-                 onClick={() => setActiveStoryStep(index)}
-                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                   activeStoryStep === index
-                     ? 'bg-red-500'
-                     : activeStoryStep > index
-                     ? 'bg-amber-500'
-                     : 'bg-stone-600'
-                 }`}
-               />
-             ))}
-           </div>
-         </div>
-       </div>
-     </section>
-
-     {/* Enhanced Testimonials */}
-     <section 
-       ref={testimonialRef}
-       className="py-24 px-6 lg:px-8 bg-black relative overflow-hidden"
-     >
-       <div className="absolute inset-0">
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.05),transparent_70%)]"></div>
-       </div>
-       
-       <div className="max-w-7xl mx-auto relative z-10">
-         <div className="text-center mb-20">
-           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 opacity-0 animate-fadeInUp">
-             Trusted by <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">Industry Leaders</span>
-           </h2>
-           <p className="text-xl text-stone-300 max-w-3xl mx-auto opacity-0 animate-fadeInUp delay-200">
-             See why innovative brands choose Glidia for customer support excellence
-           </p>
-         </div>
-
-         <div className="grid md:grid-cols-3 gap-8">
-           {testimonials.map((testimonial, index) => (
-             <div 
-               key={index} 
-               className="relative group opacity-0 animate-fadeInUp"
-               style={{ animationDelay: `${index * 200}ms` }}
-             >
-               <div className="bg-gradient-to-br from-stone-800/50 to-stone-900/50 backdrop-blur-sm rounded-2xl border border-stone-600/30 overflow-hidden hover:border-red-500/30 transition-all duration-500 h-full">
-                 {/* Gradient accent */}
-                 <div className="h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
-                 
-                 <div className="p-8">
-                   {/* Rating */}
-                   <div className="flex items-center space-x-1 mb-4">
-                     {Array.from({ length: testimonial.rating }).map((_, i) => (
-                       <Star key={i} className="w-5 h-5 text-amber-400 fill-current" />
-                     ))}
-                   </div>
-                   
-                   {/* Quote */}
-                   <blockquote className="text-white text-xl leading-relaxed mb-6 font-medium">
-                     "{testimonial.quote}"
-                   </blockquote>
-                   
-                   {/* Expanded content on hover */}
-                   <div className="max-h-0 overflow-hidden transition-all duration-500 group-hover:max-h-40 opacity-0 group-hover:opacity-100">
-                     <p className="text-stone-300 text-sm leading-relaxed mb-4">{testimonial.expanded}</p>
-                   </div>
-                   
-                   {/* Impact Badge */}
-                   <div className="inline-flex px-3 py-1.5 bg-gradient-to-r from-emerald-900/40 to-emerald-800/40 text-emerald-300 rounded-full text-sm font-semibold mb-6 border border-emerald-700/30">
-                     <TrendingUp className="w-4 h-4 mr-2" />
-                     {testimonial.impact}
-                   </div>
-                   
-                   {/* Author */}
-                   <div className="flex items-center space-x-4">
-                     <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                       {testimonial.avatarFallback}
-                     </div>
-                     <div>
-                       <p className="font-semibold text-white">{testimonial.author}</p>
-                       <p className="text-stone-400 text-sm">{testimonial.role}, {testimonial.company}</p>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           ))}
-         </div>
-       </div>
-     </section>
-
-     {/* Enhanced Pricing Section */}
-     <section 
-       id="pricing" 
-       ref={pricingRef}
-       className="py-24 px-6 lg:px-8 bg-gradient-to-br from-stone-900 to-black relative overflow-hidden"
-     >
-       <div className="absolute inset-0">
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.05),transparent_70%)]"></div>
-       </div>
-       
-       <div className="max-w-7xl mx-auto relative z-10">
-         <div className="text-center mb-20">
-           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-900/40 to-amber-900/40 border border-red-700/30 text-red-300 text-sm font-medium mb-6 backdrop-blur-sm">
-             <DollarSign className="w-4 h-4" />
-             <span>Simple Pricing</span>
-           </div>
-           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 opacity-0 animate-fadeInUp">
-             <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">Transparent</span> Pricing
-           </h2>
-           <p className="text-xl text-stone-300 max-w-3xl mx-auto opacity-0 animate-fadeInUp delay-200">
-             Start with a 14-day free trial, no credit card required
-           </p>
-         </div>
-
-         <div className="grid md:grid-cols-3 gap-8 mb-12">
-           {pricingPlans.map((plan, index) => (
-             <div 
-               key={index} 
-               className={`relative opacity-0 animate-fadeInUp transition-all duration-500 ${
-                 plan.popular 
-                   ? 'md:scale-105 md:-translate-y-4' 
-                   : ''
-               }`}
-               style={{ animationDelay: `${index * 200}ms` }}
-             >
-               {plan.popular && (
-                 <div className="absolute -top-6 left-0 right-0 flex justify-center">
-                   <span className="bg-gradient-to-r from-red-500 to-amber-500 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
-                     Most Popular
-                   </span>
-                 </div>
-               )}
-               
-               <div className={`bg-gradient-to-br from-stone-800/50 to-stone-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border transition-all duration-500 h-full ${
-                 plan.popular 
-                   ? 'border-red-500/50 shadow-xl shadow-red-500/10' 
-                   : 'border-stone-600/30 hover:border-red-500/30'
-               }`}>
-                 <div className="p-8">
-                   <div className="text-center mb-8">
-                     <h3 className="font-bold text-white text-2xl mb-2">{plan.name}</h3>
-                     <p className="text-stone-400 mb-6">{plan.description}</p>
-                     <div className="mb-4">
-                       <span className="text-5xl font-bold text-white">${plan.price}</span>
-                       <span className="text-stone-400 text-xl">/mo</span>
-                     </div>
-                     <p className="text-sm text-stone-500 bg-stone-800/50 rounded-full py-2 px-4 inline-block">
-                       {typeof plan.responses === 'number' ? `${plan.responses.toLocaleString()} responses included` : 'Unlimited responses'}
-                     </p>
-                   </div>
-                   
-                   <ul className="space-y-4 mb-8">
-                     {plan.features.map((feature, idx) => (
-                       <li key={idx} className="flex items-start space-x-3">
-                         {feature.available ? (
-                           <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                         ) : (
-                           <Minus className="w-5 h-5 text-stone-600 flex-shrink-0 mt-0.5" />
-                         )}
-                         <span className={feature.available ? 'text-stone-300' : 'text-stone-500'}>
-                           {feature.text}
-                         </span>
-                       </li>
-                     ))}
-                   </ul>
-                   
-                   <button className={`w-full py-4 rounded-lg font-semibold transition-all duration-300 ${
-                     plan.popular
-                       ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/20'
-                       : 'bg-stone-700/80 text-white hover:bg-stone-600/80'
-                   }`}>
-                     {plan.cta}
-                   </button>
-                 </div>
-               </div>
-             </div>
-           ))}
-         </div>
-         
-         {/* Enterprise tier */}
-         <div className="bg-gradient-to-r from-stone-800/50 to-stone-900/50 rounded-2xl p-8 border border-stone-600/30 backdrop-blur-sm opacity-0 animate-fadeInUp delay-600">
-           <div className="flex flex-col md:flex-row md:items-center justify-between">
-             <div>
-               <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
-               <p className="text-stone-300 mb-4 md:mb-0">Custom solutions for large-scale operations with dedicated support</p>
-             </div>
-             <button className="bg-gradient-to-r from-stone-700 to-stone-800 hover:from-stone-600 hover:to-stone-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-3 whitespace-nowrap">
-               <Briefcase className="w-5 h-5" />
-               <span>Contact Sales</span>
-             </button>
-           </div>
-         </div>
-       </div>
-     </section>
-
-     {/* Final CTA Section */}
-     <section className="py-24 px-6 lg:px-8 bg-gradient-to-br from-black via-stone-900 to-black relative overflow-hidden">
-       <div className="absolute inset-0">
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.15),transparent_70%)]"></div>
-         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent"></div>
-         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
-       </div>
-       
-       <div className="max-w-5xl mx-auto text-center relative z-10">
-         <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 opacity-0 animate-fadeInUp">
-           Transform Your Support Experience
-         </h2>
-         <p className="text-xl text-stone-300 mb-12 max-w-3xl mx-auto opacity-0 animate-fadeInUp delay-200">
-           Join 500+ brands delivering exceptional customer experiences with neural AI
-         </p>
-
-         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 opacity-0 animate-fadeInUp delay-400">
-           <button 
-             onClick={() => window.open('/app/dashboard?shop=glidiatest.myshopify.com', '_blank')}
-             className="group bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center space-x-3 shadow-lg shadow-red-500/25"
-           >
-             <span>Start Free 14-Day Trial</span>
-             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-           </button>
-           <button className="bg-stone-800/80 backdrop-blur-sm text-stone-200 px-8 py-4 rounded-lg font-semibold hover:bg-stone-700/80 border border-stone-600/50 transition-all duration-300 flex items-center space-x-3">
-             <Calendar className="w-5 h-5" />
-             <span>Schedule Demo</span>
-           </button>
-         </div>
-         
-         {/* Trust indicators */}
-         <div className="mt-20 opacity-0 animate-fadeInUp delay-600">
-           <p className="text-stone-400 mb-8">Trusted by innovative companies worldwide</p>
-           <div className="flex flex-wrap justify-center items-center gap-12 opacity-60">
-             {Array.from({ length: 5 }).map((_, i) => (
-               <div key={i} className="h-8 w-32 bg-stone-700/30 rounded-lg animate-pulse"></div>
-             ))}
-           </div>
-         </div>
-       </div>
-     </section>
-
-     {/* Footer */}
-     <Footer />
-   </div>
- );
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
 }

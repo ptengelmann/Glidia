@@ -1,3 +1,4 @@
+// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -13,16 +14,22 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://*.shopify.com https://*.myshopify.com https://admin.shopify.com;",
           },
           {
-            key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://*.shopify.com https://*.myshopify.com;",
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL',
           },
         ],
       },
     ];
+  },
+  // Add this for better Vercel deployment
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
   },
 };
 
